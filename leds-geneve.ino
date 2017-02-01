@@ -78,7 +78,7 @@ void loop() {
   uint16_t k = random(0, 6);
   colorWipe(0x00, 0x00, 0x00, 50, k);
   // temps d'arrêt aléatoire compris entre 50 ms et 500ms
-  delay(random(50, 500));
+  delay(random(50, 5000));
 }
 
 
