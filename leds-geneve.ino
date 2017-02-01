@@ -1,8 +1,8 @@
-/*******************************************************
+/*********************************************************************************
    Driver de leds pour le plafonier de l'entree
    Projet Geneve
-   2017 - Noclick.noscreen_
- ******************************************************/
+   2017 - Noclick.noscreen_ - Pierre-Gilles Levallois
+*********************************************************************************/
 #include "FastLED.h"
 #define NUM_ZONES 6
 // Definir les 6 zones a eclairer
@@ -42,6 +42,9 @@ CRGB leds3[NUM_LEDS_D];
 CRGB leds4[NUM_LEDS_E];
 CRGB leds5[NUM_LEDS_F];
 
+/*********************************************************************************
+ * Setup 
+ *********************************************************************************/
 void setup()
 {
   //FastLED.addLeds<WS2811, PIN_ZONE_A, GRB>(leds0, NUM_LEDS[0]).setCorrection( TypicalLEDStrip );
@@ -67,30 +70,38 @@ void setup()
 
 }
 
-// *** REPLACE FROM HERE ***
+/*********************************************************************************
+ * BOUCLE
+ *********************************************************************************/
 void loop() {
   // Changer une zone au hasard
   uint16_t k = random(0, 6);
   colorWipe(0x00, 0x00, 0x00, 50, k);
+  // temps d'arrêt aléatoire compris entre 50 ms et 500ms
+  delay(random(50, 500));
 }
 
 
+/*********************************************************************************
+ * ColorWipe : Allumer toutes les leds une à une sur toute la longueur du ruban
+ * dans l'ordre et avec une coleur unique, mais choisi au hasard.
+ *********************************************************************************/
 void colorWipe(byte red, byte green, byte blue, int SpeedDelay, int NumZone) {
+  // Choix d'une couleur aléatoire
   red = random(0, 255);
   green = random(0, 255);
   blue = random(0, 255);
 
   for (uint16_t i = 0; i < NUM_LEDS[NumZone]; i++) {
-    //setPixel(i, red, green, blue, NumZone);
     setPixel(i, red, green, blue, NumZone);
     showStrip();
     delay(SpeedDelay);
-    //SpeedDelay++;
   }
 }
 
-// *** REPLACE TO HERE ***
-
+/*********************************************************************************
+ * Framework d'abtraction NEOPIXEL / FastLED
+*********************************************************************************/
 void showStrip() {
 #ifdef ADAFRUIT_NEOPIXEL_H
   // NeoPixel
