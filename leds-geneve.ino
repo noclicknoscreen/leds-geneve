@@ -43,11 +43,10 @@ CRGB leds4[NUM_LEDS_E];
 CRGB leds5[NUM_LEDS_F];
 
 /*********************************************************************************
- * Setup 
+   Setup
  *********************************************************************************/
 void setup()
 {
-  //FastLED.addLeds<WS2811, PIN_ZONE_A, GRB>(leds0, NUM_LEDS[0]).setCorrection( TypicalLEDStrip );
   /*
     FastLED.addLeds<NEOPIXEL, PIN_ZONE_A>(leds0, NUM_LEDS[0]);
     FastLED.addLeds<NEOPIXEL, PIN_ZONE_B>(leds1, NUM_LEDS[1]);
@@ -62,36 +61,44 @@ void setup()
   FastLED.addLeds<WS2811, PIN_ZONE_D, GRB>(leds3, NUM_LEDS[3]).setCorrection( TypicalLEDStrip );
   FastLED.addLeds<WS2811, PIN_ZONE_E, GRB>(leds4, NUM_LEDS[4]).setCorrection( TypicalLEDStrip );
   FastLED.addLeds<WS2811, PIN_ZONE_F, GRB>(leds5, NUM_LEDS[5]).setCorrection( TypicalLEDStrip );
-    // Init de toutes les zones
-    for (uint16_t i = 0; i < NUM_ZONES; i++) {
-      colorWipe(0x70, 0xa2, 0x08, 50, i);
-      delay(50);
-    }
+  
+  // Tout à noir
+  for (uint16_t i = 0; i < NUM_ZONES; i++) {
+    setAll(0, 0, 0, i);
+  }
+  
+  // couleur au hasard
+  int red = random(0, 255);
+  int green = random(0, 255);
+  int blue = random(0, 255);
 
+  // Init de toutes les zones
+  for (uint16_t i = 0; i < NUM_ZONES; i++) {
+    setAll(red, green, blue, i);
+    delay(5);
+  }
 }
 
 /*********************************************************************************
- * BOUCLE
+   BOUCLE
  *********************************************************************************/
 void loop() {
   // Changer une zone au hasard
   uint16_t k = random(0, 6);
-  colorWipe(0x00, 0x00, 0x00, 50, k);
+  int red = random(0, 255);
+  int green = random(0, 255);
+  int blue = random(0, 255);
+  colorWipe(red, green, blue, 50, k);
   // temps d'arrêt aléatoire compris entre 50 ms et 500ms
   delay(random(50, 5000));
 }
 
-
 /*********************************************************************************
- * ColorWipe : Allumer toutes les leds une à une sur toute la longueur du ruban
- * dans l'ordre et avec une coleur unique, mais choisi au hasard.
+   ColorWipe : Allumer toutes les leds une à une sur toute la longueur du ruban
+   dans l'ordre et avec une coleur unique, mais choisi au hasard.
  *********************************************************************************/
 void colorWipe(byte red, byte green, byte blue, int SpeedDelay, int NumZone) {
   // Choix d'une couleur aléatoire
-  red = random(0, 255);
-  green = random(0, 255);
-  blue = random(0, 255);
-
   for (uint16_t i = 0; i < NUM_LEDS[NumZone]; i++) {
     setPixel(i, red, green, blue, NumZone);
     showStrip();
@@ -100,7 +107,7 @@ void colorWipe(byte red, byte green, byte blue, int SpeedDelay, int NumZone) {
 }
 
 /*********************************************************************************
- * Framework d'abtraction NEOPIXEL / FastLED
+   Framework d'abtraction NEOPIXEL / FastLED
 *********************************************************************************/
 void showStrip() {
 #ifdef ADAFRUIT_NEOPIXEL_H
