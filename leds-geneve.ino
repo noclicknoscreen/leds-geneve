@@ -13,6 +13,7 @@
 
 *********************************************************************************/
 #include "FastLED.h"
+
 #define NUM_ZONES 6
 // Definir les 6 zones a eclairer
 /*
@@ -58,6 +59,7 @@ byte r;
 byte g;
 byte b;
 
+int brightness_value = 20; // Between 0 and 100 %
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -96,13 +98,18 @@ void setup()
   }
 
   choix = 1;
+  // debug
+  Serial.begin(9600);
 }
 
 /*********************************************************************************
    BOUCLE
  *********************************************************************************/
-void loop() {
+void loop() {  
+  // Choix d'une zone au hasard
   uint8_t k = random(0, 6);
+  
+  // Choix d'une couleur au hasard
   r = byte(random(0, 255));
   g = byte(random(0, 255));
   b = byte(random(0, 255));
@@ -124,6 +131,7 @@ void loop() {
       //      setAll(r/10, g/10, b/10, k);
       //      break;
   }
+
 }
 
 /*
@@ -205,6 +213,11 @@ void showStrip() {
 }
 
 void setPixel(int Pixel, byte red, byte green, byte blue, int NumZone) {
+  // Setting Brightness
+  red = red * brightness_value / 100;
+  green = green * brightness_value / 100;
+  blue = blue * brightness_value / 100;
+
 #ifdef ADAFRUIT_NEOPIXEL_H
   // NeoPixel
   strip.setPixelColor(Pixel, strip.Color(red, green, blue));
@@ -242,8 +255,8 @@ void setPixel(int Pixel, byte red, byte green, byte blue, int NumZone) {
       leds5[Pixel].g = green;
       leds5[Pixel].b = blue;
       break;
-
   }
+
 #endif
 }
 
