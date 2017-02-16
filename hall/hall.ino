@@ -59,7 +59,7 @@ byte r;
 byte g;
 byte b;
 
-int brightness_value = 20; // Between 0 and 100 %
+int brightness_value = 30; // Between 0 and 100 %
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -105,22 +105,38 @@ void setup()
 /*********************************************************************************
    BOUCLE
  *********************************************************************************/
-void loop() {  
+void loop() {
   // Choix d'une zone au hasard
   uint8_t k = random(0, 6);
+  
+  // Choix d'un temps d'arrêt aléatoire compris entre 50 ms et 5000ms
+  uint32_t waiting_time = random(500, 10000);
   
   // Choix d'une couleur au hasard
   r = byte(random(0, 255));
   g = byte(random(0, 255));
   b = byte(random(0, 255));
 
+  // Choix de la brightness
+  brightness_value = random(0, 100);
+
+  // Debug values
+  Serial.println("------------------------------------------------");
+  Serial.print("zone : "); Serial.println(k);
+  Serial.print("Scénario : "); Serial.println(choix);
+  Serial.print("r:"); Serial.print(r);
+  Serial.print(", g:"); Serial.print(g);
+  Serial.print(", b:"); Serial.println(b);
+  Serial.print("Brightness : "); Serial.println(brightness_value);
+  Serial.print("Temps d'attente : "); Serial.println(waiting_time);
+  
   // choix du scénario
   switch (choix) {
     case 1 :
       // Changer une zone au hasard
       colorWipe(r, g, b, 50, k);
       // temps d'arrêt aléatoire compris entre 50 ms et 500ms
-      delay(random(50, 5000));
+      delay(waiting_time);
       break;
     case 2:
       // faire scintiller des leds
