@@ -2,6 +2,15 @@
    Driver de leds pour le plafonier de l'entree
    Projet Geneve
    2017 - Noclick.noscreen_ - Pierre-Gilles Levallois
+
+   TODO :
+    - scénario qui fait une vague (sinusoidale de la brillance)
+      entre les différentes zones de A à F
+    - Scénario qui augmente et diminue doucement une zone.
+    - Allumer la LED 13 pour dire quel scénario est en cours
+      (1 cligno puis temps mort, 2 cli ou 3 cli)
+    - Ajouter une lecture de pin digitale pour le contact sec)
+
 *********************************************************************************/
 #include "FastLED.h"
 #define NUM_ZONES 6
@@ -42,6 +51,13 @@ CRGB leds3[NUM_LEDS_D];
 CRGB leds4[NUM_LEDS_E];
 CRGB leds5[NUM_LEDS_F];
 
+// Choix du scénario
+uint8_t choix = 1;
+
+byte r;
+byte g;
+byte b;
+
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -61,38 +77,87 @@ void setup()
   FastLED.addLeds<WS2811, PIN_ZONE_D, GRB>(leds3, NUM_LEDS[3]).setCorrection( TypicalLEDStrip );
   FastLED.addLeds<WS2811, PIN_ZONE_E, GRB>(leds4, NUM_LEDS[4]).setCorrection( TypicalLEDStrip );
   FastLED.addLeds<WS2811, PIN_ZONE_F, GRB>(leds5, NUM_LEDS[5]).setCorrection( TypicalLEDStrip );
-  
+
   // Tout à noir
   for (uint16_t i = 0; i < NUM_ZONES; i++) {
     setAll(0, 0, 0, i);
   }
-  
-  // couleur au hasard
-  int red = random(0, 255);
-  int green = random(0, 255);
-  int blue = random(0, 255);
+  showStrip();
 
   // Init de toutes les zones
-  for (uint16_t i = 0; i < NUM_ZONES; i++) {
-    setAll(red, green, blue, i);
-    delay(5);
+  for (uint8_t i = 0; i < NUM_ZONES; i++) {
+    // couleur au hasard
+    r = byte(random(0, 255));
+    g = byte(random(0, 255));
+    b = byte(random(0, 255));
+    setAll(r, g, b, i);
+    delay(30);
+    showStrip();
   }
+
+  choix = 1;
 }
 
 /*********************************************************************************
    BOUCLE
  *********************************************************************************/
 void loop() {
-  // Changer une zone au hasard
-  uint16_t k = random(0, 6);
-  int red = random(0, 255);
-  int green = random(0, 255);
-  int blue = random(0, 255);
-  colorWipe(red, green, blue, 50, k);
-  // temps d'arrêt aléatoire compris entre 50 ms et 500ms
-  delay(random(50, 5000));
+  uint8_t k = random(0, 6);
+  r = byte(random(0, 255));
+  g = byte(random(0, 255));
+  b = byte(random(0, 255));
+
+  // choix du scénario
+  switch (choix) {
+    case 1 :
+      // Changer une zone au hasard
+      colorWipe(r, g, b, 50, k);
+      // temps d'arrêt aléatoire compris entre 50 ms et 500ms
+      delay(random(50, 5000));
+      break;
+    case 2:
+      // faire scintiller des leds
+      SnowSparkle(0x30, 0x30, 0x30, 50, random(100, 1000), k);
+      break;
+      //    case 3 :
+      //      CylonBounce(r, g, b, 3, 60, 60, k);
+      //      setAll(r/10, g/10, b/10, k);
+      //      break;
+  }
 }
 
+/*
+   Cyclon
+
+  void CylonBounce(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay, int NumZone) {
+
+  for (int i = 0; i < NUM_LEDS[NumZone] - EyeSize - 2; i++) {
+    setAll(0, 0, 0, NumZone);
+    setPixel(i, red / 10, green / 10, blue / 10, NumZone);
+    for (int j = 1; j <= EyeSize; j++) {
+      setPixel(i + j, red, green, blue, NumZone);
+    }
+    setPixel(i + EyeSize + 1, red / 10, green / 10, blue / 10, NumZone);
+    showStrip();
+    delay(SpeedDelay);
+  }
+
+  delay(ReturnDelay);
+
+  for (int i = NUM_LEDS[NumZone] - EyeSize - 2; i > 0; i--) {
+    setAll(0, 0, 0, NumZone);
+    setPixel(i, red / 10, green / 10, blue / 10, NumZone);
+    for (int j = 1; j <= EyeSize; j++) {
+      setPixel(i + j, red, green, blue, NumZone);
+    }
+    setPixel(i + EyeSize + 1, red / 10, green / 10, blue / 10, NumZone);
+    showStrip();
+    delay(SpeedDelay);
+  }
+
+  delay(ReturnDelay);
+  }
+*/
 /*********************************************************************************
    ColorWipe : Allumer toutes les leds une à une sur toute la longueur du ruban
    dans l'ordre et avec une coleur unique, mais choisi au hasard.
@@ -106,6 +171,25 @@ void colorWipe(byte red, byte green, byte blue, int SpeedDelay, int NumZone) {
   }
 }
 
+/*********************************************************************************
+   SnowSparkle : Allumer toutes les leds ave une couleur choisie, puis faire
+   scintiller des leds au hasard dans la zone.
+ *********************************************************************************/
+void SnowSparkle(byte red, byte green, byte blue, int SparkleDelay, int SpeedDelay, int NumZone) {
+  red = byte(int(red * 0.5));
+  green = byte(int(green * 0.5));
+  blue = byte(int(blue * 0.5));
+  setAll(red, green, blue, NumZone);
+  // Choisir un pixel au hasard
+  int Pixel = random(NUM_LEDS[NumZone]);
+  // TODO :Choisir la couleur la plus brillante dans le respect de la couleur de départ
+  setPixel(Pixel, 0xff, 0xff, 0xff, NumZone);
+  showStrip();
+  delay(SparkleDelay);
+  setPixel(Pixel, red, green, blue, NumZone);
+  showStrip();
+  delay(SpeedDelay);
+}
 /*********************************************************************************
    Framework d'abtraction NEOPIXEL / FastLED
 *********************************************************************************/
