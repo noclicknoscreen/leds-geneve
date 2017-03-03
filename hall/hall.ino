@@ -29,21 +29,22 @@ FASTLED_USING_NAMESPACE
 
 // Definir les 6 zones a eclairer
 // Valeurs réelles
-# define NUM_LEDS_A 86
-# define NUM_LEDS_B 74
-# define NUM_LEDS_C 104
-# define NUM_LEDS_D 89
-# define NUM_LEDS_E 85
-# define NUM_LEDS_F 84
+/*
+  # define NUM_LEDS_A 86
+  # define NUM_LEDS_B 74
+  # define NUM_LEDS_C 104
+  # define NUM_LEDS_D 89
+  # define NUM_LEDS_E 85
+  # define NUM_LEDS_F 84
 
-/* Valeurs pour la maquette
-  # define NUM_LEDS_A 22
-  # define NUM_LEDS_B 18
-  # define NUM_LEDS_C 26
-  # define NUM_LEDS_D 22
-  # define NUM_LEDS_E 22
-  # define NUM_LEDS_F 21
-*/
+  /* Valeurs pour la maquette */
+# define NUM_LEDS_A 22
+# define NUM_LEDS_B 18
+# define NUM_LEDS_C 26
+# define NUM_LEDS_D 22
+# define NUM_LEDS_E 22
+# define NUM_LEDS_F 21
+
 
 const int PINS[] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D, PIN_ZONE_E, PIN_ZONE_F};
 const int NUM_LEDS[] = {NUM_LEDS_A, NUM_LEDS_B, NUM_LEDS_C, NUM_LEDS_D, NUM_LEDS_E, NUM_LEDS_F};
@@ -65,8 +66,8 @@ uint8_t choix = 1;
 
 
 
-int brightness_value = 10; // Between 0 and 100 %
-#define BRIGHTNESS         50
+int brightness_value = 40; // Between 0 and 100 %
+
 #define FRAMES_PER_SECOND 120
 
 /*********************************************************************************
@@ -100,13 +101,9 @@ void setup()
   //  zoneE = LedsZone(PIN_ZONE_E, 5, ZONE_BG, ZONE_CW, 0, NUM_LEDS[4], 28, 14).init();
   //  zoneF = LedsZone(PIN_ZONE_F, 6, ZONE_BG, ZONE_CW, 0, NUM_LEDS[5], 28, 14).init();
 
-  FastLED.setBrightness(BRIGHTNESS);
+  FastLED.setBrightness(brightness_value);
 
-  // Tout à noir
-  for (uint16_t i = 0; i < NUM_ZONES; i++) {
-    allColor(CRGB::Black, i);
-  }
-  showStrip();
+  tout_eteindre();
 
   // Init de toutes les zones
   for (uint8_t i = 0; i < NUM_ZONES; i++) {
@@ -116,13 +113,14 @@ void setup()
     showStrip();
   }
 
-  choix = 1;
+  choix = 0;
 }
 
 /*********************************************************************************
    BOUCLE
  *********************************************************************************/
 void loop() {
+
   // Choix d'une zone au hasard
   uint8_t k = random(0, NUM_ZONES);
 
@@ -131,7 +129,7 @@ void loop() {
 
   // Choix d'une couleur au hasard
   couleur = randomColor();
-  
+
   // Choix de la brightness
   brightness_value = random(0, 100);
 
@@ -147,6 +145,15 @@ void loop() {
 
   // choix du scénario
   switch (choix) {
+    case 0 : // Scénario de test des zones
+      FastLED.setBrightness(25);
+      tout_eteindre();
+      Serial.println("------------------------ Test du paramétrage des zones ------------------------");
+      for (int i = 0; i < NUM_ZONES; i++) {
+        Serial.print("zone : "); Serial.println(i);
+        testZone(randomColor(), 125, i);
+      }
+      break;
     case 1 :
       // Changer une zone au hasard
       colorWipe(couleur, 50, k);
@@ -157,11 +164,41 @@ void loop() {
       // faire scintiller des leds
       SnowSparkle(CRGB::Yellow, 50, random(100, 1000), k);
       break;
-      //    case 3 :
-      //      CylonBounce(r, g, b, 3, 60, 60, k);
-      //      setAll(r/10, g/10, b/10, k);
-      //      break;
+    case 3:
+      // Disolve color to black
+      allRandom(k);
+      delay(waiting_time / 2);
+      disolve(15, 100, 50, k);
+      delay(waiting_time / 2);
+      break;
+    case 4:  // Flash
+      colorWipe(couleur, 50, k);
+      delay(waiting_time / 2);
+      flash(couleur, 10, 50, k);
+      delay(waiting_time / 2);
+      break;
+    case 5:  // ColorWipe With Direction
+      colorWipe(couleur, 50, k, BACKWARD);
+      delay(waiting_time);
+      break;
+    case 6:  // Rainbaw
+      for (int i = 0; i < NUM_ZONES; i++) {
+        rainbow(2, 30, i);
+      }
+      break;
+    case 7:  // theaterChase
+      theaterChase(couleur, 10, 50, k);
+      break;
   }
+
+}
+
+void tout_eteindre() {
+  // Tout à noir
+  for (uint16_t i = 0; i < NUM_ZONES; i++) {
+    allColor(CRGB::Black, i);
+  }
+  showStrip();
 
 }
 
