@@ -127,7 +127,7 @@ void setup()
  *********************************************************************************/
 void loop() {
   // Choix d'une zone au hasard
-  uint8_t k = random(0, 6);
+  uint8_t k = random(0, NUM_ZONES);
   
   // Choix d'un temps d'arrêt aléatoire compris entre 50 ms et 5000ms
   uint32_t waiting_time = random(500, 10000);
