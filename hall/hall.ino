@@ -16,18 +16,7 @@
 
 #define NUM_ZONES 6
 // Definir les 6 zones a eclairer
-/*
-  typedef struct
-  {
-  String name;
-  const int pin;
-  const int numleds;
-  } zone;
 
-  const zone zones[1] = {
-  { "A", 3, 22 }
-  };
-*/
 # define NUM_LEDS_A 22
 # define NUM_LEDS_B 18
 # define NUM_LEDS_C 26
@@ -59,7 +48,7 @@ byte r;
 byte g;
 byte b;
 
-int brightness_value = 30; // Between 0 and 100 %
+int brightness_value = 10; // Between 0 and 100 %
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -79,6 +68,7 @@ void setup()
   FastLED.addLeds<WS2811, PIN_ZONE_D, GRB>(leds3, NUM_LEDS[3]).setCorrection( TypicalLEDStrip );
   FastLED.addLeds<WS2811, PIN_ZONE_E, GRB>(leds4, NUM_LEDS[4]).setCorrection( TypicalLEDStrip );
   FastLED.addLeds<WS2811, PIN_ZONE_F, GRB>(leds5, NUM_LEDS[5]).setCorrection( TypicalLEDStrip );
+  // ici il faudra intégrer l'appel au helper qui permet de changer les orientations des zones.
 
   // Tout à noir
   for (uint16_t i = 0; i < NUM_ZONES; i++) {
