@@ -235,17 +235,11 @@ void SnowSparkle(byte red, byte green, byte blue, int SparkleDelay, int SpeedDel
   delay(SpeedDelay);
 }
 /*********************************************************************************
-   Framework d'abtraction NEOPIXEL / FastLED
+   Framework FastLED
 *********************************************************************************/
 void showStrip() {
-#ifdef ADAFRUIT_NEOPIXEL_H
-  // NeoPixel
-  strip.show();
-#endif
-#ifndef ADAFRUIT_NEOPIXEL_H
   // FastLED
   FastLED.show();
-#endif
 }
 
 void setPixel(int Pixel, byte red, byte green, byte blue, int NumZone) {
@@ -253,12 +247,6 @@ void setPixel(int Pixel, byte red, byte green, byte blue, int NumZone) {
   red = red * brightness_value / 100;
   green = green * brightness_value / 100;
   blue = blue * brightness_value / 100;
-
-#ifdef ADAFRUIT_NEOPIXEL_H
-  // NeoPixel
-  strip.setPixelColor(Pixel, strip.Color(red, green, blue));
-#endif
-#ifndef ADAFRUIT_NEOPIXEL_H
   // FastLED
   switch (NumZone) {
     case 0 :
@@ -292,8 +280,6 @@ void setPixel(int Pixel, byte red, byte green, byte blue, int NumZone) {
       leds5[Pixel].b = blue;
       break;
   }
-
-#endif
 }
 
 void setAll(byte red, byte green, byte blue, int NumZone) {
