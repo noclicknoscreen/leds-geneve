@@ -36,8 +36,8 @@ FASTLED_USING_NAMESPACE
   # define NUM_LEDS_D 89
   # define NUM_LEDS_E 85
   # define NUM_LEDS_F 84
-
-  /* Valeurs pour la maquette */
+*/
+/* Valeurs pour la maquette */
 # define NUM_LEDS_A 22
 # define NUM_LEDS_B 18
 # define NUM_LEDS_C 26
@@ -62,7 +62,7 @@ CRGB * leds[] = {leds0, leds1, leds2, leds3, leds4, leds5};
 CRGB couleur;
 
 // Choix du scénario
-uint8_t choix = 1;
+char choix = '1';
 
 
 
@@ -113,7 +113,7 @@ void setup()
     showStrip();
   }
 
-  choix = 0;
+  choix = '9';
 }
 
 /*********************************************************************************
@@ -145,7 +145,7 @@ void loop() {
 
   // choix du scénario
   switch (choix) {
-    case 0 : // Scénario de test des zones
+    case '0' : // Scénario de test des zones
       FastLED.setBrightness(25);
       tout_eteindre();
       Serial.println("------------------------ Test du paramétrage des zones ------------------------");
@@ -154,40 +154,54 @@ void loop() {
         testZone(randomColor(), 125, i);
       }
       break;
-    case 1 :
+    case '1' :
       // Changer une zone au hasard
       colorWipe(couleur, 50, k);
       // temps d'arrêt aléatoire compris entre 50 ms et 500ms
       delay(waiting_time);
       break;
-    case 2:
+    case '2' :
       // faire scintiller des leds
       SnowSparkle(CRGB::Yellow, 50, random(100, 1000), k);
       break;
-    case 3:
+    case '3' :
       // Disolve color to black
       allRandom(k);
       delay(waiting_time / 2);
       disolve(15, 100, 50, k);
       delay(waiting_time / 2);
       break;
-    case 4:  // Flash
+    case '4' :  // Flash
       colorWipe(couleur, 50, k);
       delay(waiting_time / 2);
       flash(couleur, 10, 50, k);
       delay(waiting_time / 2);
       break;
-    case 5:  // ColorWipe With Direction
+    case '5' :  // ColorWipe With Direction
       colorWipe(couleur, 50, k, BACKWARD);
       delay(waiting_time);
       break;
-    case 6:  // Rainbaw
+    case '6' :  // Rainbaw
       for (int i = 0; i < NUM_ZONES; i++) {
         rainbow(2, 30, i);
       }
       break;
-    case 7:  // theaterChase
-      theaterChase(couleur, 10, 50, k);
+    case '7' :
+      // theaterChase
+      theaterChase(couleur, 3, 50, k);
+      // theaterChaseRainbow
+      theaterChaseRainbow(1, 50, k);
+      break;
+    case '8' :  
+    {
+      // theaterChaseRainbow
+      CRGB oldColor = leds[k][0];
+      lightning(CRGB::White, 20, 50, MEDIUM, k);
+      allColor(oldColor, k);
+      break;
+    }
+    case '9' :  // cyclon
+      cylon(couleur, 3, 50, k);
       break;
   }
 
