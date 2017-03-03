@@ -13,7 +13,8 @@
 
 *********************************************************************************/
 #include "FastLED.h"
-#include <LedsZone.h>
+
+FASTLED_USING_NAMESPACE
 
 // Nombre de zones
 #define NUM_ZONES 6
@@ -34,14 +35,14 @@
 # define NUM_LEDS_D 89
 # define NUM_LEDS_E 85
 # define NUM_LEDS_F 84
- 
+
 /* Valeurs pour la maquette
-# define NUM_LEDS_A 22
-# define NUM_LEDS_B 18
-# define NUM_LEDS_C 26
-# define NUM_LEDS_D 22
-# define NUM_LEDS_E 22
-# define NUM_LEDS_F 21
+  # define NUM_LEDS_A 22
+  # define NUM_LEDS_B 18
+  # define NUM_LEDS_C 26
+  # define NUM_LEDS_D 22
+  # define NUM_LEDS_E 22
+  # define NUM_LEDS_F 21
 */
 
 const int PINS[] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D, PIN_ZONE_E, PIN_ZONE_F};
@@ -56,72 +57,66 @@ CRGB leds5[NUM_LEDS_F];
 
 CRGB * leds[] = {leds0, leds1, leds2, leds3, leds4, leds5};
 
-LedsZone zoneA;
-LedsZone zoneB;
-LedsZone zoneC;
-LedsZone zoneD;
-LedsZone zoneE;
-LedsZone zoneF;
+// Variable de couleur.
+CRGB couleur;
 
 // Choix du scénario
 uint8_t choix = 1;
 
-byte r;
-byte g;
-byte b;
+
 
 int brightness_value = 10; // Between 0 and 100 %
+#define BRIGHTNESS         50
+#define FRAMES_PER_SECOND 120
+
+/*********************************************************************************
+   Framework FastLED
+*********************************************************************************/
+//void setPixel(int Pixel, byte red, byte green, byte blue, int NumZone) {
+void setPixel(int Pixel, CRGB c, int NumZone) {
+  // FastLED
+  leds[NumZone][Pixel] = c;
+}
+
+#include "scenarii-leds.h"
+
 /*********************************************************************************
    Setup
  *********************************************************************************/
 void setup()
 {
   Serial.begin(9600);
-//  FastLED.addLeds<WS2811, PIN_ZONE_A, GRB>(leds0, NUM_LEDS[0]).setCorrection( TypicalLEDStrip );
-//  FastLED.addLeds<WS2811, PIN_ZONE_B, GRB>(leds1, NUM_LEDS[1]).setCorrection( TypicalLEDStrip );
-//  FastLED.addLeds<WS2811, PIN_ZONE_C, GRB>(leds2, NUM_LEDS[2]).setCorrection( TypicalLEDStrip );
-//  FastLED.addLeds<WS2811, PIN_ZONE_D, GRB>(leds3, NUM_LEDS[3]).setCorrection( TypicalLEDStrip );
-//  FastLED.addLeds<WS2811, PIN_ZONE_E, GRB>(leds4, NUM_LEDS[4]).setCorrection( TypicalLEDStrip );
-//  FastLED.addLeds<WS2811, PIN_ZONE_F, GRB>(leds5, NUM_LEDS[5]).setCorrection( TypicalLEDStrip );
 
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_A>(leds0, NUM_LEDS[0]).setCorrection( TypicalLEDStrip );
-  zoneA = LedsZone(PIN_ZONE_A, 1, ZONE_BG, ZONE_CW, 0, NUM_LEDS[0], 29, 14).init();
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_A>(leds0, NUM_LEDS[0]).setCorrection( Candle );
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_B>(leds1, NUM_LEDS[1]).setCorrection( Candle );
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_C>(leds2, NUM_LEDS[2]).setCorrection( Candle );
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_D>(leds3, NUM_LEDS[3]).setCorrection( Candle );
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_E>(leds4, NUM_LEDS[4]).setCorrection( Candle );
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_F>(leds5, NUM_LEDS[5]).setCorrection( Candle );
+  //  zoneA = LedsZone(PIN_ZONE_A, 1, ZONE_BG, ZONE_CW, 0, NUM_LEDS[0], 29, 14).init();
+  //  zoneB = LedsZone(PIN_ZONE_B, 2, ZONE_BG, ZONE_CW, 0, NUM_LEDS[1], 22, 14).init();
+  //  zoneC = LedsZone(PIN_ZONE_C, 3, ZONE_BG, ZONE_CW, 0, NUM_LEDS[2], 37, 14).init();
+  //  zoneD = LedsZone(PIN_ZONE_D, 4, ZONE_BG, ZONE_CW, 0, NUM_LEDS[3], 30, 14).init();
+  //  zoneE = LedsZone(PIN_ZONE_E, 5, ZONE_BG, ZONE_CW, 0, NUM_LEDS[4], 28, 14).init();
+  //  zoneF = LedsZone(PIN_ZONE_F, 6, ZONE_BG, ZONE_CW, 0, NUM_LEDS[5], 28, 14).init();
 
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_B>(leds1, NUM_LEDS[1]).setCorrection( TypicalLEDStrip );
-  zoneB = LedsZone(PIN_ZONE_B, 2, ZONE_BG, ZONE_CW, 0, NUM_LEDS[1], 22, 14).init();
-
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_C>(leds2, NUM_LEDS[2]).setCorrection( TypicalLEDStrip );
-  zoneC = LedsZone(PIN_ZONE_C, 3, ZONE_BG, ZONE_CW, 0, NUM_LEDS[2], 37, 14).init();
-
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_D>(leds3, NUM_LEDS[3]).setCorrection( TypicalLEDStrip );
-  zoneD = LedsZone(PIN_ZONE_D, 4, ZONE_BG, ZONE_CW, 0, NUM_LEDS[3], 30, 14).init();
-
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_E>(leds4, NUM_LEDS[4]).setCorrection( TypicalLEDStrip );
-  zoneE = LedsZone(PIN_ZONE_E, 5, ZONE_BG, ZONE_CW, 0, NUM_LEDS[4], 28, 14).init();
-
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_F>(leds5, NUM_LEDS[5]).setCorrection( TypicalLEDStrip );
-  zoneF = LedsZone(PIN_ZONE_F, 6, ZONE_BG, ZONE_CW, 0, NUM_LEDS[5], 28, 14).init();
+  FastLED.setBrightness(BRIGHTNESS);
 
   // Tout à noir
   for (uint16_t i = 0; i < NUM_ZONES; i++) {
-    setAll(0, 0, 0, i);
+    allColor(CRGB::Black, i);
   }
   showStrip();
 
   // Init de toutes les zones
   for (uint8_t i = 0; i < NUM_ZONES; i++) {
     // couleur au hasard
-    r = byte(random(0, 255));
-    g = byte(random(0, 255));
-    b = byte(random(0, 255));
-    setAll(r, g, b, i);
+    allColor(randomColor(), i);
     delay(30);
     showStrip();
   }
 
   choix = 1;
-  // debug
-  Serial.begin(9600);
 }
 
 /*********************************************************************************
@@ -130,15 +125,13 @@ void setup()
 void loop() {
   // Choix d'une zone au hasard
   uint8_t k = random(0, NUM_ZONES);
-  
+
   // Choix d'un temps d'arrêt aléatoire compris entre 50 ms et 5000ms
   uint32_t waiting_time = random(500, 10000);
-  
-  // Choix d'une couleur au hasard
-  r = byte(random(0, 255));
-  g = byte(random(0, 255));
-  b = byte(random(0, 255));
 
+  // Choix d'une couleur au hasard
+  couleur = randomColor();
+  
   // Choix de la brightness
   brightness_value = random(0, 100);
 
@@ -146,23 +139,23 @@ void loop() {
   Serial.println("------------------------------------------------");
   Serial.print("zone : "); Serial.println(k);
   Serial.print("Scénario : "); Serial.println(choix);
-  Serial.print("r:"); Serial.print(r);
-  Serial.print(", g:"); Serial.print(g);
-  Serial.print(", b:"); Serial.println(b);
+  Serial.print("r:"); Serial.print(couleur.r);
+  Serial.print(", g:"); Serial.print(couleur.g);
+  Serial.print(", b:"); Serial.println(couleur.b);
   Serial.print("Brightness : "); Serial.println(brightness_value);
   Serial.print("Temps d'attente : "); Serial.println(waiting_time);
-  
+
   // choix du scénario
   switch (choix) {
     case 1 :
       // Changer une zone au hasard
-      colorWipe(r, g, b, 50, k);
+      colorWipe(couleur, 50, k);
       // temps d'arrêt aléatoire compris entre 50 ms et 500ms
       delay(waiting_time);
       break;
     case 2:
       // faire scintiller des leds
-      SnowSparkle(0x30, 0x30, 0x30, 50, random(100, 1000), k);
+      SnowSparkle(CRGB::Yellow, 50, random(100, 1000), k);
       break;
       //    case 3 :
       //      CylonBounce(r, g, b, 3, 60, 60, k);
@@ -172,92 +165,3 @@ void loop() {
 
 }
 
-/*
-   Cyclon
-
-  void CylonBounce(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay, int NumZone) {
-
-  for (int i = 0; i < NUM_LEDS[NumZone] - EyeSize - 2; i++) {
-    setAll(0, 0, 0, NumZone);
-    setPixel(i, red / 10, green / 10, blue / 10, NumZone);
-    for (int j = 1; j <= EyeSize; j++) {
-      setPixel(i + j, red, green, blue, NumZone);
-    }
-    setPixel(i + EyeSize + 1, red / 10, green / 10, blue / 10, NumZone);
-    showStrip();
-    delay(SpeedDelay);
-  }
-
-  delay(ReturnDelay);
-
-  for (int i = NUM_LEDS[NumZone] - EyeSize - 2; i > 0; i--) {
-    setAll(0, 0, 0, NumZone);
-    setPixel(i, red / 10, green / 10, blue / 10, NumZone);
-    for (int j = 1; j <= EyeSize; j++) {
-      setPixel(i + j, red, green, blue, NumZone);
-    }
-    setPixel(i + EyeSize + 1, red / 10, green / 10, blue / 10, NumZone);
-    showStrip();
-    delay(SpeedDelay);
-  }
-
-  delay(ReturnDelay);
-  }
-*/
-/*********************************************************************************
-   ColorWipe : Allumer toutes les leds une à une sur toute la longueur du ruban
-   dans l'ordre et avec une coleur unique, mais choisi au hasard.
- *********************************************************************************/
-void colorWipe(byte red, byte green, byte blue, int SpeedDelay, int NumZone) {
-  // Choix d'une couleur aléatoire
-  for (uint16_t i = 0; i < NUM_LEDS[NumZone]; i++) {
-    setPixel(i, red, green, blue, NumZone);
-    showStrip();
-    delay(SpeedDelay);
-  }
-}
-
-/*********************************************************************************
-   SnowSparkle : Allumer toutes les leds ave une couleur choisie, puis faire
-   scintiller des leds au hasard dans la zone.
- *********************************************************************************/
-void SnowSparkle(byte red, byte green, byte blue, int SparkleDelay, int SpeedDelay, int NumZone) {
-  red = byte(int(red * 0.5));
-  green = byte(int(green * 0.5));
-  blue = byte(int(blue * 0.5));
-  setAll(red, green, blue, NumZone);
-  // Choisir un pixel au hasard
-  int Pixel = random(NUM_LEDS[NumZone]);
-  // TODO :Choisir la couleur la plus brillante dans le respect de la couleur de départ
-  setPixel(Pixel, 0xff, 0xff, 0xff, NumZone);
-  showStrip();
-  delay(SparkleDelay);
-  setPixel(Pixel, red, green, blue, NumZone);
-  showStrip();
-  delay(SpeedDelay);
-}
-/*********************************************************************************
-   Framework FastLED
-*********************************************************************************/
-void showStrip() {
-  // FastLED
-  FastLED.show();
-}
-
-void setPixel(int Pixel, byte red, byte green, byte blue, int NumZone) {
-  // Setting Brightness
-  red = red * brightness_value / 100;
-  green = green * brightness_value / 100;
-  blue = blue * brightness_value / 100;
-  // FastLED
-  leds[NumZone][Pixel].r = red;
-  leds[NumZone][Pixel].g = green;
-  leds[NumZone][Pixel].b = blue;
-}
-
-void setAll(byte red, byte green, byte blue, int NumZone) {
-  for (int i = 0; i < NUM_LEDS[NumZone]; i++ ) {
-    setPixel(i, red, green, blue, NumZone);
-  }
-  showStrip();
-}
