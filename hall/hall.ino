@@ -54,6 +54,8 @@ CRGB leds3[NUM_LEDS_D];
 CRGB leds4[NUM_LEDS_E];
 CRGB leds5[NUM_LEDS_F];
 
+CRGB * leds[] = {leds0, leds1, leds2, leds3, leds4, leds5};
+
 LedsZone zoneA;
 LedsZone zoneB;
 LedsZone zoneC;
@@ -248,38 +250,9 @@ void setPixel(int Pixel, byte red, byte green, byte blue, int NumZone) {
   green = green * brightness_value / 100;
   blue = blue * brightness_value / 100;
   // FastLED
-  switch (NumZone) {
-    case 0 :
-      leds0[Pixel].r = red;
-      leds0[Pixel].g = green;
-      leds0[Pixel].b = blue;
-      break;
-    case 1 :
-      leds1[Pixel].r = red;
-      leds1[Pixel].g = green;
-      leds1[Pixel].b = blue;
-      break;
-    case 2 :
-      leds2[Pixel].r = red;
-      leds2[Pixel].g = green;
-      leds2[Pixel].b = blue;
-      break;
-    case 3 :
-      leds3[Pixel].r = red;
-      leds3[Pixel].g = green;
-      leds3[Pixel].b = blue;
-      break;
-    case 4 :
-      leds4[Pixel].r = red;
-      leds4[Pixel].g = green;
-      leds4[Pixel].b = blue;
-      break;
-    case 5 :
-      leds5[Pixel].r = red;
-      leds5[Pixel].g = green;
-      leds5[Pixel].b = blue;
-      break;
-  }
+  leds[NumZone][Pixel].r = red;
+  leds[NumZone][Pixel].g = green;
+  leds[NumZone][Pixel].b = blue;
 }
 
 void setAll(byte red, byte green, byte blue, int NumZone) {
