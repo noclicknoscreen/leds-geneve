@@ -13,23 +13,36 @@
 
 *********************************************************************************/
 #include "FastLED.h"
+#include <LedsZone.h>
 
+// Nombre de zones
 #define NUM_ZONES 6
-// Definir les 6 zones a eclairer
 
-# define NUM_LEDS_A 22
-# define NUM_LEDS_B 18
-# define NUM_LEDS_C 26
-# define NUM_LEDS_D 22
-# define NUM_LEDS_E 22
-# define NUM_LEDS_F 21
-
+// Signaux de pilotage des zones
 # define PIN_ZONE_A 6
 # define PIN_ZONE_B 16
 # define PIN_ZONE_C 17
 # define PIN_ZONE_D 20
 # define PIN_ZONE_E 22
 # define PIN_ZONE_F 23
+
+// Definir les 6 zones a eclairer
+// Valeurs réelles
+# define NUM_LEDS_A 86
+# define NUM_LEDS_B 74
+# define NUM_LEDS_C 104
+# define NUM_LEDS_D 89
+# define NUM_LEDS_E 85
+# define NUM_LEDS_F 84
+ 
+/* Valeurs pour la maquette
+# define NUM_LEDS_A 22
+# define NUM_LEDS_B 18
+# define NUM_LEDS_C 26
+# define NUM_LEDS_D 22
+# define NUM_LEDS_E 22
+# define NUM_LEDS_F 21
+*/
 
 const int PINS[] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D, PIN_ZONE_E, PIN_ZONE_F};
 const int NUM_LEDS[] = {NUM_LEDS_A, NUM_LEDS_B, NUM_LEDS_C, NUM_LEDS_D, NUM_LEDS_E, NUM_LEDS_F};
@@ -40,6 +53,13 @@ CRGB leds2[NUM_LEDS_C];
 CRGB leds3[NUM_LEDS_D];
 CRGB leds4[NUM_LEDS_E];
 CRGB leds5[NUM_LEDS_F];
+
+LedsZone zoneA;
+LedsZone zoneB;
+LedsZone zoneC;
+LedsZone zoneD;
+LedsZone zoneE;
+LedsZone zoneF;
 
 // Choix du scénario
 uint8_t choix = 1;
@@ -54,21 +74,31 @@ int brightness_value = 10; // Between 0 and 100 %
  *********************************************************************************/
 void setup()
 {
-  /*
-    FastLED.addLeds<NEOPIXEL, PIN_ZONE_A>(leds0, NUM_LEDS[0]);
-    FastLED.addLeds<NEOPIXEL, PIN_ZONE_B>(leds1, NUM_LEDS[1]);
-    FastLED.addLeds<NEOPIXEL, PIN_ZONE_C>(leds2, NUM_LEDS[2]);
-    FastLED.addLeds<NEOPIXEL, PIN_ZONE_D>(leds3, NUM_LEDS[3]);
-    FastLED.addLeds<NEOPIXEL, PIN_ZONE_E>(leds4, NUM_LEDS[4]);
-    FastLED.addLeds<NEOPIXEL, PIN_ZONE_F>(leds5, NUM_LEDS[5]);
-  */
-  FastLED.addLeds<WS2811, PIN_ZONE_A, GRB>(leds0, NUM_LEDS[0]).setCorrection( TypicalLEDStrip );
-  FastLED.addLeds<WS2811, PIN_ZONE_B, GRB>(leds1, NUM_LEDS[1]).setCorrection( TypicalLEDStrip );
-  FastLED.addLeds<WS2811, PIN_ZONE_C, GRB>(leds2, NUM_LEDS[2]).setCorrection( TypicalLEDStrip );
-  FastLED.addLeds<WS2811, PIN_ZONE_D, GRB>(leds3, NUM_LEDS[3]).setCorrection( TypicalLEDStrip );
-  FastLED.addLeds<WS2811, PIN_ZONE_E, GRB>(leds4, NUM_LEDS[4]).setCorrection( TypicalLEDStrip );
-  FastLED.addLeds<WS2811, PIN_ZONE_F, GRB>(leds5, NUM_LEDS[5]).setCorrection( TypicalLEDStrip );
-  // ici il faudra intégrer l'appel au helper qui permet de changer les orientations des zones.
+  Serial.begin(9600);
+//  FastLED.addLeds<WS2811, PIN_ZONE_A, GRB>(leds0, NUM_LEDS[0]).setCorrection( TypicalLEDStrip );
+//  FastLED.addLeds<WS2811, PIN_ZONE_B, GRB>(leds1, NUM_LEDS[1]).setCorrection( TypicalLEDStrip );
+//  FastLED.addLeds<WS2811, PIN_ZONE_C, GRB>(leds2, NUM_LEDS[2]).setCorrection( TypicalLEDStrip );
+//  FastLED.addLeds<WS2811, PIN_ZONE_D, GRB>(leds3, NUM_LEDS[3]).setCorrection( TypicalLEDStrip );
+//  FastLED.addLeds<WS2811, PIN_ZONE_E, GRB>(leds4, NUM_LEDS[4]).setCorrection( TypicalLEDStrip );
+//  FastLED.addLeds<WS2811, PIN_ZONE_F, GRB>(leds5, NUM_LEDS[5]).setCorrection( TypicalLEDStrip );
+
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_A>(leds0, NUM_LEDS[0]).setCorrection( TypicalLEDStrip );
+  zoneA = LedsZone(PIN_ZONE_A, 1, ZONE_BG, ZONE_CW, 0, NUM_LEDS[0], 29, 14).init();
+
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_B>(leds1, NUM_LEDS[1]).setCorrection( TypicalLEDStrip );
+  zoneB = LedsZone(PIN_ZONE_B, 2, ZONE_BG, ZONE_CW, 0, NUM_LEDS[1], 22, 14).init();
+
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_C>(leds2, NUM_LEDS[2]).setCorrection( TypicalLEDStrip );
+  zoneC = LedsZone(PIN_ZONE_C, 3, ZONE_BG, ZONE_CW, 0, NUM_LEDS[2], 37, 14).init();
+
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_D>(leds3, NUM_LEDS[3]).setCorrection( TypicalLEDStrip );
+  zoneD = LedsZone(PIN_ZONE_D, 4, ZONE_BG, ZONE_CW, 0, NUM_LEDS[3], 30, 14).init();
+
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_E>(leds4, NUM_LEDS[4]).setCorrection( TypicalLEDStrip );
+  zoneE = LedsZone(PIN_ZONE_E, 5, ZONE_BG, ZONE_CW, 0, NUM_LEDS[4], 28, 14).init();
+
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_F>(leds5, NUM_LEDS[5]).setCorrection( TypicalLEDStrip );
+  zoneF = LedsZone(PIN_ZONE_F, 6, ZONE_BG, ZONE_CW, 0, NUM_LEDS[5], 28, 14).init();
 
   // Tout à noir
   for (uint16_t i = 0; i < NUM_ZONES; i++) {
