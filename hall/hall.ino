@@ -113,13 +113,17 @@ void setup()
     showStrip();
   }
 
-  choix = '9';
+  choix = 'B';
 }
 
 /*********************************************************************************
    BOUCLE
  *********************************************************************************/
 void loop() {
+  if (Serial.available()) {
+    choix = Serial.read();
+    Serial.print("\nNouveau choix :"); Serial.println(choix);
+  }
 
   // Choix d'une zone au hasard
   uint8_t k = random(0, NUM_ZONES);
@@ -201,8 +205,24 @@ void loop() {
       break;
     }
     case '9' :  // cyclon
-      cylon(couleur, 3, 50, k);
+      for (int i = 0; i < NUM_ZONES; i++) {
+        cylon(couleur, 4, 30, i);
+      }
       break;
+    case 'A'  : 
+    {
+      CRGB couleur2 = randomColor();
+      stripes(couleur, couleur2, 3, k);
+      delay(waiting_time);
+      break;
+    }
+    case 'B' : 
+    {
+      //NewKITT(couleur, 4, 50, 50, k);
+      CenterToOutside(couleur, NUM_LEDS[k]%4, 50, 50, k);
+      OutsideToCenter(couleur, NUM_LEDS[k]%4, 50, 50, k);
+      allColor(couleur, k);
+    }
   }
 
 }
