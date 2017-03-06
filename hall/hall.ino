@@ -29,22 +29,21 @@ FASTLED_USING_NAMESPACE
 
 // Definir les 6 zones a eclairer
 // Valeurs réelles
-/*
-  # define NUM_LEDS_A 86
-  # define NUM_LEDS_B 74
-  # define NUM_LEDS_C 104
-  # define NUM_LEDS_D 89
-  # define NUM_LEDS_E 85
-  # define NUM_LEDS_F 84
-*/
-/* Valeurs pour la maquette */
+# define NUM_LEDS_A 90  // 30x2 + 15x2
+# define NUM_LEDS_B 76  // 23x2 + 15x2
+# define NUM_LEDS_C 106 // 38x2 + 15x2
+# define NUM_LEDS_D 90  // 30x2 + 15x2
+# define NUM_LEDS_E 88  // 29x2 + 15x2
+# define NUM_LEDS_F 88  // 29x2 + 15x2
+
+/* Valeurs pour la maquette 
 # define NUM_LEDS_A 22
 # define NUM_LEDS_B 18
 # define NUM_LEDS_C 26
 # define NUM_LEDS_D 22
 # define NUM_LEDS_E 22
 # define NUM_LEDS_F 21
-
+*/
 
 const int PINS[] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D, PIN_ZONE_E, PIN_ZONE_F};
 const int NUM_LEDS[] = {NUM_LEDS_A, NUM_LEDS_B, NUM_LEDS_C, NUM_LEDS_D, NUM_LEDS_E, NUM_LEDS_F};
@@ -60,11 +59,14 @@ CRGB * leds[] = {leds0, leds1, leds2, leds3, leds4, leds5};
 
 // Variable de couleur.
 CRGB couleur;
+CRGB couleur_zones[NUM_ZONES];
 
 // Choix du scénario
 char choix = '1';
 
-
+// Pour les calculs de pulsations
+float heartBeat;
+float heartFreq = 10000;
 
 int brightness_value = 40; // Between 0 and 100 %
 
@@ -87,13 +89,13 @@ void setPixel(int Pixel, CRGB c, int NumZone) {
 void setup()
 {
   Serial.begin(9600);
-
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_A>(leds0, NUM_LEDS[0]).setCorrection( Candle );
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_B>(leds1, NUM_LEDS[1]).setCorrection( Candle );
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_C>(leds2, NUM_LEDS[2]).setCorrection( Candle );
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_D>(leds3, NUM_LEDS[3]).setCorrection( Candle );
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_E>(leds4, NUM_LEDS[4]).setCorrection( Candle );
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_F>(leds5, NUM_LEDS[5]).setCorrection( Candle );
+  // Correction intéressantes : Candle (intime, plus sur les rouges), Tungsten40W, Tungsten100W, ClearBlueSky (tire sur le vert/bleu)
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_A>(leds0, NUM_LEDS[0]).setCorrection( Tungsten100W );
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_B>(leds1, NUM_LEDS[1]).setCorrection( Tungsten100W );
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_C>(leds2, NUM_LEDS[2]).setCorrection( Tungsten100W );
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_D>(leds3, NUM_LEDS[3]).setCorrection( Tungsten100W );
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_E>(leds4, NUM_LEDS[4]).setCorrection( Tungsten100W );
+  FastLED.addLeds<NEOPIXEL, PIN_ZONE_F>(leds5, NUM_LEDS[5]).setCorrection( Tungsten100W );
   //  zoneA = LedsZone(PIN_ZONE_A, 1, ZONE_BG, ZONE_CW, 0, NUM_LEDS[0], 29, 14).init();
   //  zoneB = LedsZone(PIN_ZONE_B, 2, ZONE_BG, ZONE_CW, 0, NUM_LEDS[1], 22, 14).init();
   //  zoneC = LedsZone(PIN_ZONE_C, 3, ZONE_BG, ZONE_CW, 0, NUM_LEDS[2], 37, 14).init();
@@ -113,7 +115,12 @@ void setup()
     showStrip();
   }
 
-  choix = 'B';
+  // Faire un tableau de couleurs pour certains scénarii
+  for (int n = 0; n < NUM_ZONES; n++) {
+    couleur_zones[n] = randomColor();
+  }
+
+  choix = '0';
 }
 
 /*********************************************************************************
@@ -145,6 +152,7 @@ void loop() {
   Serial.print(", g:"); Serial.print(couleur.g);
   Serial.print(", b:"); Serial.println(couleur.b);
   Serial.print("Brightness : "); Serial.println(brightness_value);
+  Serial.print("FPS : "); Serial.println(FastLED.getFPS(), DEC);
   Serial.print("Temps d'attente : "); Serial.println(waiting_time);
 
   // choix du scénario
@@ -155,8 +163,19 @@ void loop() {
       Serial.println("------------------------ Test du paramétrage des zones ------------------------");
       for (int i = 0; i < NUM_ZONES; i++) {
         Serial.print("zone : "); Serial.println(i);
-        testZone(randomColor(), 125, i);
+        testZone(randomColor(), 125, 1, i);
       }
+      tout_eteindre();
+      FastLED.setBrightness(25);
+      // Test de toutes les zones comme un seul ruban
+      for (int n = 0; n < NUM_ZONES; n++) {
+        for (int i = 0; i < NUM_LEDS[n]; i++) {
+          leds[n][i] = 0xf0f0f0; // 0xffad08; //couleur_zones[n];
+          showStrip();
+        }
+        delay(MEDIUM);
+      }
+      tout_eteindre();
       break;
     case '1' :
       // Changer une zone au hasard
@@ -196,33 +215,55 @@ void loop() {
       // theaterChaseRainbow
       theaterChaseRainbow(1, 50, k);
       break;
-    case '8' :  
-    {
-      // theaterChaseRainbow
-      CRGB oldColor = leds[k][0];
-      lightning(CRGB::White, 20, 50, MEDIUM, k);
-      allColor(oldColor, k);
-      break;
-    }
+    case '8' :
+      {
+        // theaterChaseRainbow
+        CRGB oldColor = leds[k][0];
+        lightning(CRGB::White, 20, 50, MEDIUM, k);
+        allColor(oldColor, k);
+        break;
+      }
     case '9' :  // cyclon
       for (int i = 0; i < NUM_ZONES; i++) {
         cylon(couleur, 4, 30, i);
       }
       break;
-    case 'A'  : 
-    {
-      CRGB couleur2 = randomColor();
-      stripes(couleur, couleur2, 3, k);
-      delay(waiting_time);
-      break;
-    }
-    case 'B' : 
-    {
-      //NewKITT(couleur, 4, 50, 50, k);
-      CenterToOutside(couleur, NUM_LEDS[k]%4, 50, 50, k);
-      OutsideToCenter(couleur, NUM_LEDS[k]%4, 50, 50, k);
-      allColor(couleur, k);
-    }
+    case 'A'  :
+      {
+        CRGB couleur2 = randomColor();
+        stripes(couleur, couleur2, 3, k);
+        delay(waiting_time);
+        break;
+      }
+    case 'B' :
+      {
+        //NewKITT(couleur, 4, 50, 50, k);
+        CenterToOutside(couleur, NUM_LEDS[k] % 4, 50, 50, k);
+        OutsideToCenter(couleur, NUM_LEDS[k] % 4, 50, 50, k);
+        allColor(couleur, k);
+      }
+    case 'C' :
+      {
+        // Toutes les zones : éclaraige pulsant sinusoïdale
+        int total_led = 0;
+        // On fait 100 pulsations
+        for (int pulse = 10; pulse < 110; pulse++) {
+          // --- Calculation of heartBeat
+          heartBeat = fmod(millis(), heartFreq) / heartFreq;
+          heartBeat = 0.5f * (sin(TWO_PI * heartBeat) + 1);
+          brightness_value = 100.0f * heartBeat;
+          FastLED.setBrightness(brightness_value);
+          for (int n = 0; n < NUM_ZONES; n++) {
+            total_led += NUM_LEDS[n];
+            for (int i = 0; i < NUM_LEDS[n]; i++) {
+              leds[n][i] = 0xffad08; //couleur_zones[n];
+            }
+          }
+          showStrip();
+          //delay(FASTER);
+        }
+        //couleur_zones[random(NUM_ZONES)] = randomColor();
+      }
   }
 
 }
