@@ -7,6 +7,8 @@
     - scénario qui fait une vague (sinusoidale de la brillance)
       entre les différentes zones de A à F
     - Scénario qui augmente et diminue doucement une zone.
+    - Allumer la LED 13 pour dire quel scénario est en cours
+      (1 cligno puis temps mort, 2 cli ou 3 cli)
     - Ajouter une lecture de pin digitale pour le contact sec)
 
 *********************************************************************************/
@@ -15,42 +17,48 @@
 FASTLED_USING_NAMESPACE
 
 // Nombre de zones
-#define NUM_ZONES 6
+#define NUM_ZONES 25
 
 // Signaux de pilotage des zones
-# define PIN_ZONE_A 6
-# define PIN_ZONE_B 16
-# define PIN_ZONE_C 17
-# define PIN_ZONE_D 20
-# define PIN_ZONE_E 22
-# define PIN_ZONE_F 23
-
-// Signaux de pilotage des scénarii
-#define PIN_SC1 7
-#define PIN_SC2 8
-#define PIN_SC3 A0
-#define PIN_SC4 A1
+# define PIN_1 6
+# define PIN_2 16
+# define PIN_3 17
+# define PIN_4 20
+# define PIN_5 22
+# define PIN_6 23
+# define PIN_7 24
+# define PIN_8 25
 
 // Definir les 6 zones a eclairer
 // Valeurs réelles
-# define NUM_LEDS_A 90  // 30x2 + 15x2
-# define NUM_LEDS_B 76  // 23x2 + 15x2
-# define NUM_LEDS_C 106 // 38x2 + 15x2
-# define NUM_LEDS_D 90  // 30x2 + 15x2
-# define NUM_LEDS_E 88  // 29x2 + 15x2
-# define NUM_LEDS_F 88  // 29x2 + 15x2
+#define NUM_LEDS_3B 43
+#define NUM_LEDS_2C 33
+#define NUM_LEDS_2B 19
+#define NUM_LEDS_1A 54
+#define NUM_LEDS_4A 34
+#define NUM_LEDS_3A 35
+#define NUM_LEDS_4A 7
+#define NUM_LEDS_4C 38
+#define NUM_LEDS_4B 0 // ? Non défini ?
+#define NUM_LEDS_4B 4
+#define NUM_LEDS_4C 51
+#define NUM_LEDS_3A 43
+#define NUM_LEDS_4A 23
+#define NUM_LEDS_1A 41
+#define NUM_LEDS_2B 18
+#define NUM_LEDS_2C 30
+#define NUM_LEDS_2A 7
 
-/* Valeurs pour la maquette 
-# define NUM_LEDS_A 22
-# define NUM_LEDS_B 18
-# define NUM_LEDS_C 26
-# define NUM_LEDS_D 22
-# define NUM_LEDS_E 22
-# define NUM_LEDS_F 21
-*/
-
-const int PINS[] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D, PIN_ZONE_E, PIN_ZONE_F};
-const int NUM_LEDS[] = {NUM_LEDS_A, NUM_LEDS_B, NUM_LEDS_C, NUM_LEDS_D, NUM_LEDS_E, NUM_LEDS_F};
+const int PINS[] = {PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7, PIN_8};
+const int NUM_LEDS[] = {
+  NUM_LEDS_3B, NUM_LEDS_2C, NUM_LEDS_2B, NUM_LEDS_1A,
+  NUM_LEDS_4A, NUM_LEDS_3A, NUM_LEDS_G, NUM_LEDS_H,
+  NUM_LEDS_I, NUM_LEDS_J, NUM_LEDS_K, NUM_LEDS_L,
+  NUM_LEDS_M, NUM_LEDS_N, NUM_LEDS_O, NUM_LEDS_P,
+  NUM_LEDS_Q, NUM_LEDS_Q2, NUM_LEDS_R, NUM_LEDS_S,
+  NUM_LEDS_T, NUM_LEDS_U, NUM_LEDS_V, NUM_LEDS_W,
+  NUM_LEDS_X
+};
 
 CRGB leds0[NUM_LEDS_A];
 CRGB leds1[NUM_LEDS_B];
@@ -58,9 +66,32 @@ CRGB leds2[NUM_LEDS_C];
 CRGB leds3[NUM_LEDS_D];
 CRGB leds4[NUM_LEDS_E];
 CRGB leds5[NUM_LEDS_F];
+CRGB leds6[NUM_LEDS_G];
+CRGB leds7[NUM_LEDS_H];
+CRGB leds8[NUM_LEDS_I];
+CRGB leds9[NUM_LEDS_J];
+CRGB leds10[NUM_LEDS_K];
+CRGB leds11[NUM_LEDS_L];
+CRGB leds12[NUM_LEDS_M];
+CRGB leds13[NUM_LEDS_N];
+CRGB leds14[NUM_LEDS_O];
+CRGB leds15[NUM_LEDS_P];
+CRGB leds16[NUM_LEDS_Q];
+CRGB leds17[NUM_LEDS_Q2];
+CRGB leds18[NUM_LEDS_R];
+CRGB leds19[NUM_LEDS_S];
+CRGB leds20[NUM_LEDS_T];
+CRGB leds21[NUM_LEDS_U];
+CRGB leds22[NUM_LEDS_V];
+CRGB leds23[NUM_LEDS_W];
+CRGB leds24[NUM_LEDS_X];
 
-CRGB * leds[] = {leds0, leds1, leds2, leds3, leds4, leds5};
 
+CRGB * leds[] = {
+  leds0, leds1, leds2, leds3, leds4, leds5, leds6, leds7, leds8, leds9, leds10,
+  leds11, leds12, leds13, leds14, leds15, leds16, leds17, leds18, leds19, leds20,
+  leds21, leds22, leds23, leds24
+};
 // Variable de couleur.
 CRGB couleur;
 CRGB couleur_zones[NUM_ZONES];
@@ -93,13 +124,6 @@ void setPixel(int Pixel, CRGB c, int NumZone) {
 void setup()
 {
   Serial.begin(9600);
-
-  // Pin de pilotage des scénarii
-  pinMode(PIN_SC1, INPUT_PULLUP); // dry contact
-  pinMode(PIN_SC2, INPUT_PULLUP); // dry contact
-  pinMode(PIN_SC3, INPUT_PULLUP); // dry contact
-  pinMode(PIN_SC4, INPUT_PULLUP); // dry contact
-
   // Correction intéressantes : Candle (intime, plus sur les rouges), Tungsten40W, Tungsten100W, ClearBlueSky (tire sur le vert/bleu)
   FastLED.addLeds<NEOPIXEL, PIN_ZONE_A>(leds0, NUM_LEDS[0]).setCorrection( Tungsten100W );
   FastLED.addLeds<NEOPIXEL, PIN_ZONE_B>(leds1, NUM_LEDS[1]).setCorrection( Tungsten100W );

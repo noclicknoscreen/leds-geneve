@@ -58,15 +58,6 @@ FASTLED_USING_NAMESPACE
 // ??? #define NUM_LEDS_
 #define NUM_LEDS_X 18
 
-/* Valeurs pour la maquette
-  # define NUM_LEDS_A 22
-  # define NUM_LEDS_B 18
-  # define NUM_LEDS_C 26
-  # define NUM_LEDS_D 22
-  # define NUM_LEDS_E 22
-  # define NUM_LEDS_F 21
-*/
-
 const int PINS[] = {PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7, PIN_8};
 const int NUM_LEDS[] = {
   NUM_LEDS_A, NUM_LEDS_B, NUM_LEDS_C, NUM_LEDS_D,

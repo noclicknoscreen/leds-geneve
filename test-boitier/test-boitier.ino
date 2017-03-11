@@ -10,9 +10,10 @@
     - Ajouter une lecture de pin digitale pour le contact sec)
 
 *********************************************************************************/
-#include "FastLED.h"
-
-FASTLED_USING_NAMESPACE
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+#include <avr/power.h>
+#endif
 
 // Nombre de zones
 #define NUM_ZONES 4
@@ -44,17 +45,28 @@ FASTLED_USING_NAMESPACE
 const int PINS[] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D};
 const int NUM_LEDS[] = {NUM_LEDS_A, NUM_LEDS_B, NUM_LEDS_C, NUM_LEDS_D};
 
-CRGB leds0[NUM_LEDS_A];
-CRGB leds1[NUM_LEDS_B];
-CRGB leds2[NUM_LEDS_C];
-CRGB leds3[NUM_LEDS_D];
+/*
+  CRGB leds0[NUM_LEDS_A];
+  CRGB leds1[NUM_LEDS_B];
+  CRGB leds2[NUM_LEDS_C];
+  CRGB leds3[NUM_LEDS_D];
+*/
+
+Adafruit_NeoPixel pixels_A = Adafruit_NeoPixel(NUM_LEDS[0], PIN_ZONE_A, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels_B = Adafruit_NeoPixel(NUM_LEDS[1], PIN_ZONE_B, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels_C = Adafruit_NeoPixel(NUM_LEDS[2], PIN_ZONE_C, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels_D = Adafruit_NeoPixel(NUM_LEDS[3], PIN_ZONE_D, NEO_GRB + NEO_KHZ800);
 
 
-CRGB * leds[] = {leds0, leds1, leds2, leds3};
+/* Variable de couleur.
+  CRGB couleur;
+  CRGB couleur_zones[NUM_ZONES];
+*/
 
-// Variable de couleur.
-CRGB couleur;
-CRGB couleur_zones[NUM_ZONES];
+// Une couleur RGB
+int r = 0;
+int g = 0;
+int b = 0;
 
 // Choix du scénario
 int choix = 1;
@@ -69,20 +81,25 @@ int brightness_value = 240; // Between 0 and 100 %
 
 /*********************************************************************************
    Framework FastLED
-*********************************************************************************/
-//void setPixel(int Pixel, byte red, byte green, byte blue, int NumZone) {
-void setPixel(int Pixel, CRGB c, int NumZone) {
+*********************************************************************************
+  //void setPixel(int Pixel, byte red, byte green, byte blue, int NumZone) {
+  void setPixel(int Pixel, CRGB c, int NumZone) {
   // FastLED
   leds[NumZone][Pixel] = c;
-}
+  }
 
-#include "scenarii-leds.h"
+  //#include "scenarii-leds.h"
 
-/*********************************************************************************
+  /*********************************************************************************
    Setup
  *********************************************************************************/
 void setup()
 {
+
+#if defined (__AVR_ATtiny85__)
+  if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
+#endif
+
   Serial.begin(9600);
 
   // Pin de pilotage des scénarii
@@ -93,28 +110,44 @@ void setup()
 
   // Interruptions sur les pins de choix de scénario
   //RISING/HIGH/CHANGE/LOW/FALLING
-  attachInterrupt (PIN_SC1, choix1, FALLING);  
-  attachInterrupt (PIN_SC2, choix2, FALLING);  
-  attachInterrupt (PIN_SC3, choix3, FALLING);  
+  attachInterrupt (PIN_SC1, choix1, FALLING);
+  attachInterrupt (PIN_SC2, choix2, FALLING);
+  attachInterrupt (PIN_SC3, choix3, FALLING);
   attachInterrupt (PIN_SC4, choix4, FALLING);
 
-
   // Correction intéressantes : Candle (intime, plus sur les rouges), Tungsten40W, Tungsten100W, ClearBlueSky (tire sur le vert/bleu)
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_A>(leds0, NUM_LEDS[0]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_B>(leds1, NUM_LEDS[1]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_C>(leds2, NUM_LEDS[2]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_D>(leds3, NUM_LEDS[3]).setCorrection( Tungsten100W );
+  /*
+    FastLED.addLeds<NEOPIXEL, PIN_ZONE_A>(leds0, NUM_LEDS[0]).setCorrection( Tungsten100W );
+    FastLED.addLeds<NEOPIXEL, PIN_ZONE_B>(leds1, NUM_LEDS[1]).setCorrection( Tungsten100W );
+    FastLED.addLeds<NEOPIXEL, PIN_ZONE_C>(leds2, NUM_LEDS[2]).setCorrection( Tungsten100W );
+    FastLED.addLeds<NEOPIXEL, PIN_ZONE_D>(leds3, NUM_LEDS[3]).setCorrection( Tungsten100W );
+  */
 
   // Diupplication des 4 premières zone pour tester le boitier.
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_E>(leds0, NUM_LEDS[0]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_F>(leds1, NUM_LEDS[1]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_G>(leds2, NUM_LEDS[2]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_ZONE_H>(leds3, NUM_LEDS[3]).setCorrection( Tungsten100W );
+  /*
+    FastLED.addLeds<NEOPIXEL, PIN_ZONE_E>(leds0, NUM_LEDS[0]).setCorrection( Tungsten100W );
+    FastLED.addLeds<NEOPIXEL, PIN_ZONE_F>(leds1, NUM_LEDS[1]).setCorrection( Tungsten100W );
+    FastLED.addLeds<NEOPIXEL, PIN_ZONE_G>(leds2, NUM_LEDS[2]).setCorrection( Tungsten100W );
+    FastLED.addLeds<NEOPIXEL, PIN_ZONE_H>(leds3, NUM_LEDS[3]).setCorrection( Tungsten100W );
+  */
+  pixels_A.begin(); // This initializes the NeoPixel library.
+  pixels_B.begin(); // This initializes the NeoPixel library.
+  pixels_C.begin(); // This initializes the NeoPixel library.
+  pixels_D.begin(); // This initializes the NeoPixel library.
 
-  FastLED.setBrightness(brightness_value);
+  pixels_A.setBrightness(brightness_value);
+  pixels_B.setBrightness(brightness_value);
+  pixels_C.setBrightness(brightness_value);
+  pixels_D.setBrightness(brightness_value);
 
-  tout_eteindre();
+  r = 0;
+  g = 0;
+  b = 0;
 
+
+  the_all_black();
+  Serial.println("Fin Setup...");
+  delay(1000);
   choix = 0;
 }
 
@@ -130,121 +163,130 @@ void loop() {
   //  uint32_t waiting_time = random(500, 5000);
 
   // Choix d'une couleur au hasard
-  couleur = randomColor();
+  r = random(0, 255);
+  g = random(0, 255);
+  b = random(0, 255);
 
   // Choix de la brightness
   brightness_value = random(0, 100);
-
-  // Debug values
-  Serial.println("------------------------------------------------");
-//  Serial.print("zone : "); Serial.println(k);
-  Serial.print("Scénario : "); Serial.println(choix);
-//  Serial.print("r:"); Serial.print(couleur.r);
-//  Serial.print(", g:"); Serial.print(couleur.g);
-//  Serial.print(", b:"); Serial.println(couleur.b);
-//  Serial.print("Brightness : "); Serial.println(brightness_value);
-  Serial.print("FPS : "); Serial.println(FastLED.getFPS(), DEC);
-//  Serial.print("Temps d'attente : "); Serial.println(waiting_time);
 
   // choix du scénario
   switch (choix) {
     case 0 :
       {
-        // Scénario de test des zones
-//        tout_eteindre();
-//        Serial.println("------------------------ Test du paramétrage des zones ------------------------");
-//        for (int i = 0; i < NUM_ZONES; i++) {
-//          Serial.print("zone : "); Serial.println(i);
-//          testZone(randomColor(), 30, 1, i);
-//        }
-        // Test de toutes les zones comme un seul ruban
+        r = 255;
+        g = 255;
+        b = 255;
+        the_all_black(); 
+        delay(1000);
+          
         for (int n = 0; n < NUM_ZONES; n++) {
+          Serial.print(n);
+          Serial.print(" ");
+          setAll(r, g, b, n);
+          showStrip();
+          delay(1000);
+          Serial.println();
+          /*
           for (int i = 0; i < NUM_LEDS[n]; i++) {
-            leds[n][i] = 0xf0f0f0; // 0xffad08; //couleur_zones[n];
+            setMyPixel(i, r, g, b, n);
             showStrip();
+            Serial.print(i);
+            Serial.print(" ");
+            delay(20);
           }
-          //delay(FAST);
+          */
         }
         break;
       }
     case 1 :
       // Changer une zone au hasard
-      colorWipe(couleur, FASTER, k);
-      // temps d'arrêt aléatoire compris entre 50 ms et 500ms
-      delay(1000);
       break;
     case 2 :
-      // faire scintiller des leds
-      SnowSparkle(CRGB::Yellow, 50, 50, k);
       break;
     case 3 :
       {
-        // Toutes les zones : éclaraige pulsant sinusoïdale
-        int total_led = 0;
-        // On fait 100 pulsations
-        for (int pulse = 10; pulse < 110; pulse++) {
-          // --- Calculation of heartBeat
-          heartBeat = fmod(millis(), heartFreq) / heartFreq;
-          heartBeat = 0.5f * (sin(TWO_PI * heartBeat) + 1);
-          brightness_value = 100.0f * heartBeat;
-          FastLED.setBrightness(brightness_value);
-          for (int n = 0; n < NUM_ZONES; n++) {
-            total_led += NUM_LEDS[n];
-            for (int i = 0; i < NUM_LEDS[n]; i++) {
-              leds[n][i] = 0xffad08; //couleur_zones[n];
-            }
-          }
-          showStrip();
-          //delay(FASTER);
-        }
         break;
       }
     case 4 :
-      tout_eteindre();
+      the_all_black();
       break;
 
   }
 
 }
 
-void tout_eteindre() {
+void the_all_black() {
   // Tout à noir
-  for (uint16_t i = 0; i < NUM_ZONES; i++) {
-    allColor(CRGB::Black, i);
+  for (int i = 0; i < NUM_ZONES; i++) {
+    setAll(0, 0, 0, i);
   }
   showStrip();
-
 }
 
 /*****************************************************************
- * Interruptions 
- *****************************************************************/ 
-void choix1(){
+   Interruptions
+ *****************************************************************/
+void choix1() {
   cli();
   Serial.println("CHOIX = 1");
   sei();
-  choix=1;
+  choix = 1;
 }
- 
-void choix2(){
+
+void choix2() {
   cli();
   Serial.println("CHOIX = 2");
   sei();
-  choix=2;
+  choix = 2;
 }
- 
-void choix3(){
+
+void choix3() {
   cli();
   Serial.println("CHOIX = 3");
   sei();
-  choix=3;
+  choix = 3;
 }
- 
-void choix4(){
+
+void choix4() {
   cli();
   Serial.println("CHOIX = 4");
   sei();
-  choix=4;
+  choix = 4;
 }
- 
+
+/*****************************************************************
+   Framwork
+ *****************************************************************/
+void showStrip() {
+  // Néopixel
+  pixels_A.show();
+  pixels_B.show();
+  pixels_C.show();
+  pixels_D.show();
+}
+
+void setMyPixel(int Pixel, byte red, byte green, byte blue, int numZone) {
+  // NeoPixel
+  switch (numZone) {
+    case 0 :
+      pixels_A.setPixelColor(Pixel, pixels_A.Color(red, green, blue));
+      break;
+    case 1 :
+      pixels_B.setPixelColor(Pixel, pixels_B.Color(red, green, blue));
+      break;
+    case 2 :
+      pixels_C.setPixelColor(Pixel, pixels_C.Color(red, green, blue));
+      break;
+    case 3 :
+      pixels_D.setPixelColor(Pixel, pixels_D.Color(red, green, blue));
+      break;
+  }
+}
+
+void setAll(byte red, byte green, byte blue, int numZone) {
+  for (int i = 0; i < NUM_LEDS[numZone]; i++ ) {
+    setMyPixel(i, red, green, blue, numZone);
+  }
+}
 
