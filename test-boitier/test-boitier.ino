@@ -23,7 +23,6 @@
 # define PIN_ZONE_B 4
 # define PIN_ZONE_C 5
 # define PIN_ZONE_D 6
-
 # define PIN_ZONE_E 9
 # define PIN_ZONE_F 10
 # define PIN_ZONE_G 21
@@ -41,9 +40,13 @@
 # define NUM_LEDS_B 150
 # define NUM_LEDS_C 150
 # define NUM_LEDS_D 100
+# define NUM_LEDS_E 150
+# define NUM_LEDS_F 150
+# define NUM_LEDS_G 150
+# define NUM_LEDS_H 100
 
-const int PINS[] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D};
-const int NUM_LEDS[] = {NUM_LEDS_A, NUM_LEDS_B, NUM_LEDS_C, NUM_LEDS_D};
+const int PINS[] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D, PIN_ZONE_E, PIN_ZONE_F, PIN_ZONE_G, PIN_ZONE_H};
+const int NUM_LEDS[] = {NUM_LEDS_A, NUM_LEDS_B, NUM_LEDS_C, NUM_LEDS_D, NUM_LEDS_E, NUM_LEDS_F, NUM_LEDS_G, NUM_LEDS_H};
 
 /*
   CRGB leds0[NUM_LEDS_A];
@@ -56,6 +59,10 @@ Adafruit_NeoPixel pixels_A = Adafruit_NeoPixel(NUM_LEDS[0], PIN_ZONE_A, NEO_GRB 
 Adafruit_NeoPixel pixels_B = Adafruit_NeoPixel(NUM_LEDS[1], PIN_ZONE_B, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel pixels_C = Adafruit_NeoPixel(NUM_LEDS[2], PIN_ZONE_C, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel pixels_D = Adafruit_NeoPixel(NUM_LEDS[3], PIN_ZONE_D, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels_E = Adafruit_NeoPixel(NUM_LEDS[4], PIN_ZONE_E, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels_F = Adafruit_NeoPixel(NUM_LEDS[5], PIN_ZONE_F, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels_G = Adafruit_NeoPixel(NUM_LEDS[6], PIN_ZONE_G, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels_H = Adafruit_NeoPixel(NUM_LEDS[7], PIN_ZONE_H, NEO_GRB + NEO_KHZ800);
 
 
 /* Variable de couleur.
@@ -134,21 +141,25 @@ void setup()
   pixels_B.begin(); // This initializes the NeoPixel library.
   pixels_C.begin(); // This initializes the NeoPixel library.
   pixels_D.begin(); // This initializes the NeoPixel library.
+  pixels_E.begin(); // This initializes the NeoPixel library.
+  pixels_F.begin(); // This initializes the NeoPixel library.
+  pixels_G.begin(); // This initializes the NeoPixel library.
+  pixels_H.begin(); // This initializes the NeoPixel library.
 
   pixels_A.setBrightness(brightness_value);
   pixels_B.setBrightness(brightness_value);
   pixels_C.setBrightness(brightness_value);
   pixels_D.setBrightness(brightness_value);
-
-  r = 0;
-  g = 0;
-  b = 0;
-
+  pixels_E.setBrightness(brightness_value);
+  pixels_F.setBrightness(brightness_value);
+  pixels_G.setBrightness(brightness_value);
+  pixels_H.setBrightness(brightness_value);
 
   the_all_black();
   Serial.println("Fin Setup...");
   delay(1000);
   choix = 0;
+
 }
 
 /*********************************************************************************
@@ -177,51 +188,89 @@ void loop() {
         r = 255;
         g = 255;
         b = 255;
-        the_all_black(); 
-        delay(1000);
-          
-        for (int n = 0; n < NUM_ZONES; n++) {
-          Serial.print(n);
-          Serial.print(" ");
-          setAll(r, g, b, n);
-          showStrip();
+        /*
+          the_all_black();
           delay(1000);
-          Serial.println();
-          /*
-          for (int i = 0; i < NUM_LEDS[n]; i++) {
-            setMyPixel(i, r, g, b, n);
-            showStrip();
-            Serial.print(i);
-            Serial.print(" ");
-            delay(20);
-          }
-          */
-        }
+        */
+        setAll(r, g, b, &pixels_A);
+        setAll(r, g, b, &pixels_B);
+        setAll(r, g, b, &pixels_C);
+        setAll(r, g, b, &pixels_D);
+        setAll(r, g, b, &pixels_E);
+        setAll(r, g, b, &pixels_F);
+        setAll(r, g, b, &pixels_G);
+        setAll(r, g, b, &pixels_H);
         break;
       }
+      
     case 1 :
       // Changer une zone au hasard
+        r = 255;
+        g = 255;
+        b = 255;
+        /*
+          the_all_black();
+          delay(1000);
+        */
+        setHalf(2, r, g, b, &pixels_A);
+        setHalf(2, r, g, b, &pixels_B);
+        setHalf(2, r, g, b, &pixels_C);
+        setHalf(2, r, g, b, &pixels_D);
+        setHalf(2, r, g, b, &pixels_E);
+        setHalf(2, r, g, b, &pixels_F);
+        setHalf(2, r, g, b, &pixels_G);
+        setHalf(2, r, g, b, &pixels_H);
+
       break;
+
     case 2 :
-      break;
-    case 3 :
-      {
+        r = 255;
+        g = 255;
+        b = 255;
+
+        setHalf(3, r, g, b, &pixels_A);
+        setHalf(3, r, g, b, &pixels_B);
+        setHalf(3, r, g, b, &pixels_C);
+        setHalf(3, r, g, b, &pixels_D);
+        setHalf(3, r, g, b, &pixels_E);
+        setHalf(3, r, g, b, &pixels_F);
+        setHalf(3, r, g, b, &pixels_G);
+        setHalf(3, r, g, b, &pixels_H);
+        
         break;
-      }
+
+    case 3 :
+      r = 100;
+      g = 100;
+      b = 150;
+
+      setAll(r, g, b, &pixels_A);
+      setAll(r, g, b, &pixels_B);
+      setAll(r, g, b, &pixels_C);
+      setAll(r, g, b, &pixels_D);
+      setAll(r, g, b, &pixels_E);
+      setAll(r, g, b, &pixels_F);
+      setAll(r, g, b, &pixels_G);
+      setAll(r, g, b, &pixels_H);
+
+      break;
     case 4 :
       the_all_black();
       break;
 
   }
-
 }
 
 void the_all_black() {
   // Tout à noir
-  for (int i = 0; i < NUM_ZONES; i++) {
-    setAll(0, 0, 0, i);
-  }
-  showStrip();
+  setAll(0, 0, 0, &pixels_A);
+  setAll(0, 0, 0, &pixels_B);
+  setAll(0, 0, 0, &pixels_C);
+  setAll(0, 0, 0, &pixels_D);
+  setAll(0, 0, 0, &pixels_E);
+  setAll(0, 0, 0, &pixels_F);
+  setAll(0, 0, 0, &pixels_G);
+  setAll(0, 0, 0, &pixels_H);
 }
 
 /*****************************************************************
@@ -264,11 +313,17 @@ void showStrip() {
   pixels_B.show();
   pixels_C.show();
   pixels_D.show();
+  pixels_E.show();
+  pixels_F.show();
+  pixels_G.show();
+  pixels_H.show();
 }
 
-void setMyPixel(int Pixel, byte red, byte green, byte blue, int numZone) {
-  // NeoPixel
-  switch (numZone) {
+void setMyPixel(int Pixel, byte red, byte green, byte blue, Adafruit_NeoPixel *strip) {
+  strip->setPixelColor(Pixel, pixels_A.Color(red, green, blue));
+  /*
+    // NeoPixel
+    switch (numZone) {
     case 0 :
       pixels_A.setPixelColor(Pixel, pixels_A.Color(red, green, blue));
       break;
@@ -281,12 +336,25 @@ void setMyPixel(int Pixel, byte red, byte green, byte blue, int numZone) {
     case 3 :
       pixels_D.setPixelColor(Pixel, pixels_D.Color(red, green, blue));
       break;
-  }
+    }
+  */
 }
 
-void setAll(byte red, byte green, byte blue, int numZone) {
-  for (int i = 0; i < NUM_LEDS[numZone]; i++ ) {
-    setMyPixel(i, red, green, blue, numZone);
+void setAll(byte red, byte green, byte blue, Adafruit_NeoPixel *strip) {
+  for (int i = 0; i < strip->numPixels(); i++ ) {
+    setMyPixel(i, red, green, blue, strip);
   }
+  strip->show();
+}
+
+void setHalf(int modulo, byte red, byte green, byte blue, Adafruit_NeoPixel *strip) {
+  for (int i = 0; i < strip->numPixels(); i++ ) {
+    if (i % modulo == 0) {
+      setMyPixel(i, red, green, blue, strip);
+    } else {
+      setMyPixel(i, 0, 0, 0, strip);
+    }
+  }
+  strip->show();
 }
 
