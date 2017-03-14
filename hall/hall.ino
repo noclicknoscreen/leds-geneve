@@ -37,21 +37,21 @@
 
 // Definir les 6 zones a eclairer
 // Valeurs réelles
-/*
-  # define NUM_LEDS_A 90  // 30x2 + 15x2
-  # define NUM_LEDS_B 76  // 23x2 + 15x2
-  # define NUM_LEDS_C 106 // 38x2 + 15x2
-  # define NUM_LEDS_D 90  // 30x2 + 15x2
+  # define NUM_LEDS_A 80 // 90  // 30x2 + 15x2
+  # define NUM_LEDS_B 70 //76  // 23x2 + 15x2
+  # define NUM_LEDS_C 99 // 106 // 38x2 + 15x2
+  # define NUM_LEDS_D 86 //90  // 30x2 + 15x2
   # define NUM_LEDS_E 88  // 29x2 + 15x2
   # define NUM_LEDS_F 88  // 29x2 + 15x2
 
-  /* Valeurs pour la maquette */
+  /* Valeurs pour la maquette 
 # define NUM_LEDS_A 22
 # define NUM_LEDS_B 18
 # define NUM_LEDS_C 26
 # define NUM_LEDS_D 22
 # define NUM_LEDS_E 22
 # define NUM_LEDS_F 21
+*/
 
 const int PINS[] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D, PIN_ZONE_E, PIN_ZONE_F};
 
@@ -90,8 +90,8 @@ void setup()
 #if defined (__AVR_ATtiny85__)
   if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
 #endif
-  Serial.begin(9600);
-  Serial.println("___ENTERING SETUP___");
+  //Serial.begin(9600);
+  //Serial.println("___ENTERING SETUP___");
 
   // Pin de pilotage des scénarii
   pinMode(PIN_SC1, INPUT_PULLUP); // dry contact
@@ -139,9 +139,9 @@ void setup()
   SetAllZonesToBlack();
   showAllZones();
 
-  choix = 2;
+  choix = 0;
   finished = true;
-  Serial.println("___END SETUP___");
+ // Serial.println("___END SETUP___");
 }
 
 /*********************************************************************************
@@ -193,9 +193,9 @@ void loop() {
    ColorWiping of zone
 */
 boolean colorWipe(Zone * z, int r, int g, int b) {
-  Serial.print(" : ");  Serial.print(r);
-  Serial.print(" : ");  Serial.print(g);
-  Serial.print(" : ");  Serial.println(b);
+  //Serial.print(" : ");  Serial.print(r);
+  //Serial.print(" : ");  Serial.print(g);
+  //Serial.print(" : ");  Serial.println(b);
   for (int i = 0; i < z->numZonePixels(); i++) {
     z->setZonePixel(i, r, g, b);
     wait(30);
@@ -219,13 +219,13 @@ boolean propagate_white(int freq) {
   zoneEValue = clampMap(perCent,  64,  78,   0, 255);
   zoneFValue = clampMap(perCent,  78,  96,   0, 255);
 
-  Serial.print("Values : ");  Serial.print(zoneAValue);
-  Serial.print(" : ");  Serial.print(zoneBValue);
-  Serial.print(" : ");  Serial.print(zoneCValue);
-  Serial.print(" : ");  Serial.print(zoneDValue);
-  Serial.print(" : ");  Serial.print(zoneEValue);
-  Serial.print(" : ");  Serial.print(zoneFValue);
-  Serial.println();
+  //Serial.print("Values : ");  Serial.print(zoneAValue);
+  //Serial.print(" : ");  Serial.print(zoneBValue);
+  //Serial.print(" : ");  Serial.print(zoneCValue);
+  //Serial.print(" : ");  Serial.print(zoneDValue);
+  //Serial.print(" : ");  Serial.print(zoneEValue);
+  //Serial.print(" : ");  Serial.print(zoneFValue);
+  //Serial.println();
 
   zoneA.setZoneColor(zoneAValue, zoneAValue, zoneAValue);
   zoneB.setZoneColor(zoneBValue, zoneBValue, zoneBValue);
