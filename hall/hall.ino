@@ -53,7 +53,6 @@
 # define NUM_LEDS_E 22
 # define NUM_LEDS_F 21
 
-
 const int PINS[] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D, PIN_ZONE_E, PIN_ZONE_F};
 
 Adafruit_NeoPixel pixels_A = Adafruit_NeoPixel(NUM_LEDS_A, PIN_ZONE_A, NEO_GRB + NEO_KHZ800);
@@ -81,8 +80,12 @@ float heartFreq = 10000;
 
 int brightness_value = 240; // Between 0 and 100 %
 
-// True when current scénario is finished
-bool finished = true;
+// False when current scénario is repeated for the second time
+bool firstTime = true;
+// Counter to set interruptibles Delays
+elapsedMillis elapsedTime;
+// Time to hold a scenario before, changing (to be compare to elapsedTime
+uint16_t holdTime = 0;
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -141,7 +144,8 @@ void setup()
   showAllZones();
 
   choix = 0;
-  finished = true;
+  firstTime = true;
+  holdTime = 1000;
   Serial.println("___END SETUP___");
 }
 
@@ -169,14 +173,29 @@ void loop() {
       break;
     case 2 :
       {
-        int k = random(0, NUM_ZONES - 1);
-        int r = random(0, 255);
-        int g = random(0, 255);
-        int b = random(0, 255);
-        Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
-        //colorWipe(ZONES[k], r, g, b);
-        ZONES[k]->setZoneColor(r, g, b);
-        wait(random(1000, 10000));
+        // init
+        if (firstTime) {
+          Serial.println("---------------------------------------- First Time for scénario 2 ! ------------------------------------------");
+          holdTime = 1000;
+          int k = random(0, NUM_ZONES - 1);
+          int r = random(0, 255);
+          int g = random(0, 255);
+          int b = random(0, 255);
+          Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
+        }
+
+        if (elapsedTime > holdTime) {
+          int k = random(0, NUM_ZONES - 1);
+          int r = random(0, 255);
+          int g = random(0, 255);
+          int b = random(0, 255);
+          Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
+          Serial.print("hoding time :"); Serial.print(holdTime/1000, DEC); Serial.println(" seconds");
+          elapsedTime -= holdTime;
+          holdTime = random(1000, 10000);
+          ZONES[k]->setZoneColor(r, g, b);
+          firstTime = false;
+        }
       }
       break;
     case 3 :
@@ -190,19 +209,13 @@ void loop() {
   showAllZones();
 }
 
-
-/*
-   ColorWiping of zone
-*/
-boolean colorWipe(Zone * z, int r, int g, int b) {
-  //Serial.print(" : ");  Serial.print(r);
-  //Serial.print(" : ");  Serial.print(g);
-  //Serial.print(" : ");  Serial.println(b);
-  for (int i = 0; i < z->numZonePixels(); i++) {
-    z->setZonePixel(i, r, g, b);
-    wait(30);
-  }
-  return true;
+void initScenario() {
+  // Debouncing uninterruptible delay
+  cli();
+  delay(200);
+  Serial.print("Scénario "); Serial.println(choix);
+  firstTime = true;
+  sei();
 }
 
 /*
@@ -221,14 +234,6 @@ boolean propagate_white(int freq) {
   zoneEValue = clampMap(perCent,  64,  78,   0, 255);
   zoneFValue = clampMap(perCent,  78,  96,   0, 255);
 
-  //Serial.print("Values : ");  Serial.print(zoneAValue);
-  //Serial.print(" : ");  Serial.print(zoneBValue);
-  //Serial.print(" : ");  Serial.print(zoneCValue);
-  //Serial.print(" : ");  Serial.print(zoneDValue);
-  //Serial.print(" : ");  Serial.print(zoneEValue);
-  //Serial.print(" : ");  Serial.print(zoneFValue);
-  //Serial.println();
-
   zoneA.setZoneColor(zoneAValue, zoneAValue, zoneAValue);
   zoneB.setZoneColor(zoneBValue, zoneBValue, zoneBValue);
   zoneC.setZoneColor(zoneCValue, zoneCValue, zoneCValue);
@@ -239,21 +244,6 @@ boolean propagate_white(int freq) {
     return true;
   }
   return false;
-}
-
-/*
-   Waiting, using à little delay that can be interrupted without problem
-   TODO : Use a TEENSY Timer.
-*/
-void wait(int d) {
-  Serial.print("waiting for "); Serial.print(d / 1000, DEC); Serial.println(" seconds");
-  for (int t = 0; t <= d; t++) {
-    delay(1);
-    if (t % 1000 == 0) {
-      Serial.print(".");
-    }
-  }
-  Serial.println();
 }
 
 /*
@@ -269,9 +259,55 @@ void board_blinking(int freq) {
   }
 }
 
-/*
+/*****************************************************************
+   Interruptions
+ *****************************************************************/
+void choix1() {
+  choix = 1;
+  initScenario();
+}
 
-*/
+void choix2() {
+  choix = 2;
+  initScenario();
+}
+
+void choix3() {
+  choix = 3;
+  initScenario();
+}
+
+void choix4() {
+  choix = 4;
+  initScenario();
+}
+
+/*****************************************************************
+   Framwork
+ *****************************************************************/
+float clampMap(float value, float inMin, float inMax, float outMin, float outMax) {
+  return constrain(map(constrain(value,  inMin,  inMax), inMin, inMax, outMin, outMax), outMin, outMax);
+}
+
+void showAllZones() {
+  // Néopixel
+  zoneA.show();
+  zoneB.show();
+  zoneC.show();
+  zoneD.show();
+  zoneE.show();
+  zoneF.show();
+}
+
+void showAllStrips() {
+  pixels_A.show();
+  pixels_B.show();
+  pixels_C.show();
+  pixels_D.show();
+  pixels_E.show();
+  pixels_F.show();
+}
+
 void SetAllZonesToBlack() {
   // Tout à noir
   zoneA.setZoneColor(0, 0, 0);
@@ -302,54 +338,4 @@ void setAllStrips() {
     pixels_F.setPixelColor(i, 0, 0, 0);
   }
 }
-
-/*****************************************************************
-   Interruptions
- *****************************************************************/
-void choix1() {
-  choix = 1;
-  Serial.println("Scénario 1");
-}
-
-void choix2() {
-  choix = 2;
-  Serial.println("Scénario 2");
-}
-
-void choix3() {
-  choix = 3;
-  Serial.println("Scénario 3");
-}
-
-void choix4() {
-  choix = 4;
-  Serial.println("Scénario 4");
-}
-
-/*****************************************************************
-   Framwork
- *****************************************************************/
-void showAllZones() {
-  // Néopixel
-  zoneA.show();
-  zoneB.show();
-  zoneC.show();
-  zoneD.show();
-  zoneE.show();
-  zoneF.show();
-}
-
-void showAllStrips() {
-  pixels_A.show();
-  pixels_B.show();
-  pixels_C.show();
-  pixels_D.show();
-  pixels_E.show();
-  pixels_F.show();
-}
-
-float clampMap(float value, float inMin, float inMax, float outMin, float outMax) {
-  return constrain(map(constrain(value,  inMin,  inMax), inMin, inMax, outMin, outMax), outMin, outMax);
-}
-
 
