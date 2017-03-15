@@ -37,21 +37,22 @@
 
 // Definir les 6 zones a eclairer
 // Valeurs réelles
+/*
   # define NUM_LEDS_A 80 // 90  // 30x2 + 15x2
   # define NUM_LEDS_B 70 //76  // 23x2 + 15x2
   # define NUM_LEDS_C 99 // 106 // 38x2 + 15x2
   # define NUM_LEDS_D 86 //90  // 30x2 + 15x2
   # define NUM_LEDS_E 88  // 29x2 + 15x2
-  # define NUM_LEDS_F 88  // 29x2 + 15x2
-
-  /* Valeurs pour la maquette 
+  # define NUM_LEDS_F 58 // 88  // 29x2 + 15x2
+*/
+/* Valeurs pour la maquette */
 # define NUM_LEDS_A 22
 # define NUM_LEDS_B 18
 # define NUM_LEDS_C 26
 # define NUM_LEDS_D 22
 # define NUM_LEDS_E 22
 # define NUM_LEDS_F 21
-*/
+
 
 const int PINS[] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D, PIN_ZONE_E, PIN_ZONE_F};
 
@@ -90,8 +91,8 @@ void setup()
 #if defined (__AVR_ATtiny85__)
   if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
 #endif
-  //Serial.begin(9600);
-  //Serial.println("___ENTERING SETUP___");
+  Serial.begin(9600);
+  Serial.println("___ENTERING SETUP___");
 
   // Pin de pilotage des scénarii
   pinMode(PIN_SC1, INPUT_PULLUP); // dry contact
@@ -141,7 +142,7 @@ void setup()
 
   choix = 0;
   finished = true;
- // Serial.println("___END SETUP___");
+  Serial.println("___END SETUP___");
 }
 
 /*********************************************************************************
@@ -172,9 +173,10 @@ void loop() {
         int r = random(0, 255);
         int g = random(0, 255);
         int b = random(0, 255);
+        Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
         //colorWipe(ZONES[k], r, g, b);
         ZONES[k]->setZoneColor(r, g, b);
-        wait(random(1000,10000));
+        wait(random(1000, 10000));
       }
       break;
     case 3 :
@@ -244,9 +246,14 @@ boolean propagate_white(int freq) {
    TODO : Use a TEENSY Timer.
 */
 void wait(int d) {
+  Serial.print("waiting for "); Serial.print(d / 1000, DEC); Serial.println(" seconds");
   for (int t = 0; t <= d; t++) {
     delay(1);
+    if (t % 1000 == 0) {
+      Serial.print(".");
+    }
   }
+  Serial.println();
 }
 
 /*
@@ -301,18 +308,22 @@ void setAllStrips() {
  *****************************************************************/
 void choix1() {
   choix = 1;
+  Serial.println("Scénario 1");
 }
 
 void choix2() {
   choix = 2;
+  Serial.println("Scénario 2");
 }
 
 void choix3() {
   choix = 3;
+  Serial.println("Scénario 3");
 }
 
 void choix4() {
   choix = 4;
+  Serial.println("Scénario 4");
 }
 
 /*****************************************************************
