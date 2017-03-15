@@ -86,6 +86,12 @@ bool firstTime = true;
 elapsedMillis elapsedTime;
 // Time to hold a scenario before, changing (to be compare to elapsedTime
 uint16_t holdTime = 0;
+
+int k = 0;
+int r = 255;
+int g = 255;
+int b = 255;
+
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -143,6 +149,12 @@ void setup()
   SetAllZonesToBlack();
   showAllZones();
 
+  // Init some random values
+  k = random(0, NUM_ZONES - 1);
+  r = random(0, 255);
+  g = random(0, 255);
+  b = random(0, 255);
+
   choix = 0;
   firstTime = true;
   holdTime = 1000;
@@ -177,20 +189,16 @@ void loop() {
         if (firstTime) {
           Serial.println("---------------------------------------- First Time for scénario 2 ! ------------------------------------------");
           holdTime = 1000;
-          int k = random(0, NUM_ZONES - 1);
-          int r = random(0, 255);
-          int g = random(0, 255);
-          int b = random(0, 255);
           Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
         }
 
         if (elapsedTime > holdTime) {
-          int k = random(0, NUM_ZONES - 1);
-          int r = random(0, 255);
-          int g = random(0, 255);
-          int b = random(0, 255);
+          k = random(0, NUM_ZONES - 1);
+          r = random(0, 255);
+          g = random(0, 255);
+          b = random(0, 255);
           Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
-          Serial.print("hoding time :"); Serial.print(holdTime/1000, DEC); Serial.println(" seconds");
+          Serial.print("hoding time :"); Serial.print(holdTime / 1000, DEC); Serial.println(" seconds");
           elapsedTime -= holdTime;
           holdTime = random(1000, 10000);
           ZONES[k]->setZoneColor(r, g, b);
