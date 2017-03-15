@@ -189,7 +189,6 @@ void loop() {
         if (firstTime) {
           Serial.println("---------------------------------------- First Time for scénario 2 ! ------------------------------------------");
           holdTime = 1000;
-          Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
         }
 
         if (elapsedTime > holdTime) {
@@ -197,11 +196,10 @@ void loop() {
           r = random(0, 255);
           g = random(0, 255);
           b = random(0, 255);
-          Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
-          Serial.print("hoding time :"); Serial.print(holdTime / 1000, DEC); Serial.println(" seconds");
+          colorWipe(k, r, g, b);
           elapsedTime -= holdTime;
           holdTime = random(1000, 10000);
-          ZONES[k]->setZoneColor(r, g, b);
+          Serial.print("hoding time :"); Serial.print(holdTime / 1000, DEC); Serial.println(" seconds");
           firstTime = false;
         }
       }
@@ -226,6 +224,12 @@ void initScenario() {
   sei();
 }
 
+
+void colorWipe(int volumeNumber, int red, int green, int blue) {
+  Serial.print("Volume #"); Serial.println(volumeNumber);
+  Serial.print(red); Serial.print(":"); Serial.print(green); Serial.print(":"); Serial.println(blue);
+  ZONES[volumeNumber]->setZoneColor(red, green, blue);
+}
 /*
    Propagate White
 */
