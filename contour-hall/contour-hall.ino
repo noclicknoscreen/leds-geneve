@@ -116,6 +116,22 @@ void loop() {
   showAllZones();
 }
 
+
+/*
+           for ( int i = 0; i < NUM_ZONES; i++) {
+            for (int p = 0; p < STRIPS[i]->numPixels(); p++) {
+              if (p % 6 == 0 ) {
+                Serial.print("Strip #"); Serial.print(i);
+                Serial.print(", Led #"); Serial.println(p);
+                STRIPS[i]->setPixelColor(p, 255, 255, 255);
+              } else {
+                STRIPS[i]->setPixelColor(p, 0, 0, 0);
+              }
+            }
+            //}
+          }
+
+ */
 /*****************************************************************
    Binking function for onboard LED
  *****************************************************************/
