@@ -20,43 +20,41 @@ FASTLED_USING_NAMESPACE
 #define NUM_ZONES 25
 
 // Signaux de pilotage des zones
-# define PIN_1 6
-# define PIN_2 16
-# define PIN_3 17
-# define PIN_4 20
-# define PIN_5 22
-# define PIN_6 23
-# define PIN_7 24
-# define PIN_8 25
+# define PIN_1 3
+# define PIN_2 4
+# define PIN_3 5
+# define PIN_4 6
+# define PIN_5 9
+# define PIN_6 10
+# define PIN_7 21
+# define PIN_8 22
 
 // Definir les 6 zones a eclairer
 // Valeurs réelles
-#define NUM_LEDS_A 20
-#define NUM_LEDS_B 50
-#define NUM_LEDS_C 42
-#define NUM_LEDS_D 50 // 32 + 18
-#define NUM_LEDS_E 42 // 9 + 33
-#define NUM_LEDS_F 13 // 10 + 3
-#define NUM_LEDS_G 25 // 5 + 20
-#define NUM_LEDS_H 13
-#define NUM_LEDS_I 15
-#define NUM_LEDS_J 4 // 4 + 6
-#define NUM_LEDS_K 12
-#define NUM_LEDS_L 11 // 8 + 3
-#define NUM_LEDS_M 9 // 4 + 5
-#define NUM_LEDS_N 9 // 3 + 6
-#define NUM_LEDS_O 13
-#define NUM_LEDS_P 12 // 5 + 7
-#define NUM_LEDS_Q 24
-#define NUM_LEDS_Q2 8
-#define NUM_LEDS_R 22 // 11 + 11
-#define NUM_LEDS_S 32
-#define NUM_LEDS_T 30
-#define NUM_LEDS_U 41 // 17 + 24
-#define NUM_LEDS_V 54
-#define NUM_LEDS_W 42 // 28 + 14 ?
-// ??? #define NUM_LEDS_
-#define NUM_LEDS_X 18
+#define NUM_LEDS_A 15               // OK
+#define NUM_LEDS_B 44               // OK
+#define NUM_LEDS_C 43               // OK
+#define NUM_LEDS_D 44 // 28 + 16    // OK
+#define NUM_LEDS_E 33 // 27 + 6     // OK
+#define NUM_LEDS_F 9  // 2 + 7      // OK
+#define NUM_LEDS_G 19               // OK
+#define NUM_LEDS_H 9                // OK 
+#define NUM_LEDS_I 8                // OK 
+#define NUM_LEDS_J 5 // 3 + 2       // OK
+#define NUM_LEDS_K 8 //             // OK
+#define NUM_LEDS_L 6 // 2 + 4       // OK
+#define NUM_LEDS_M 5 // 2 + 3       // OK 
+#define NUM_LEDS_N 9 // 4 + 5       // OK
+#define NUM_LEDS_O 8                // OK
+#define NUM_LEDS_P 6 // 3 + 3       // OK
+#define NUM_LEDS_Q 20               // OK
+#define NUM_LEDS_R 16 // 8 + 8      // OK
+#define NUM_LEDS_S 26               // OK
+#define NUM_LEDS_T 29               // OK 
+#define NUM_LEDS_U 40 // 19 + 21    // OK
+#define NUM_LEDS_V 44               // OK
+#define NUM_LEDS_W 41 // 30 + 11    // OK
+#define NUM_LEDS_X 15               // OK
 
 const int PINS[] = {PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7, PIN_8};
 const int NUM_LEDS[] = {
