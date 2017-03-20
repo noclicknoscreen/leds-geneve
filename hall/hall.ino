@@ -87,11 +87,12 @@ elapsedMillis elapsedTime;
 // Time to hold a scenario before, changing (to be compare to elapsedTime
 uint16_t holdTime = 0;
 
+// global index for a Volume
 int k = 0;
-int r = 255;
-int g = 255;
-int b = 255;
-
+// Couleur
+int red = 255;
+int green = 255;
+int blue = 255;
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -150,10 +151,10 @@ void setup()
   showAllZones();
 
   // Init some random values
-  k = random(0, NUM_ZONES - 1);
-  r = random(0, 255);
-  g = random(0, 255);
-  b = random(0, 255);
+  k = random(0, NUM_ZONES);
+  red = random(0, 255);
+  green = random(0, 255);
+  blue = random(0, 255);
 
   choix = 0;
   firstTime = true;
@@ -171,7 +172,7 @@ void loop() {
   // choix du scénario
   switch (choix) {
     case 0 : // Scénario de test des zones
-      if (propagate_white(5000)) {
+      if (propagate_color(5000, 255, 255, 255)) {
         choix = 1;
       }
       break;
@@ -184,28 +185,51 @@ void loop() {
       zoneF.setZoneColor(175, 60, 190);
       break;
     case 2 :
+    /*
+     * All color wipes
+     */
       {
-        // init
+        // init for the first time
         if (firstTime) {
-          Serial.println("---------------------------------------- First Time for scénario 2 ! ------------------------------------------");
           holdTime = 1000;
         }
 
         if (elapsedTime > holdTime) {
-          k = random(0, NUM_ZONES - 1);
-          r = random(0, 255);
-          g = random(0, 255);
-          b = random(0, 255);
-          colorWipe(k, r, g, b);
+          k = random(0, NUM_ZONES);
+          red = random(0, 255);
+          green = random(0, 255);
+          blue = random(0, 255);
+          colorWipeZone(k, red, green, blue);
           elapsedTime -= holdTime;
           holdTime = random(1000, 10000);
           Serial.print("hoding time :"); Serial.print(holdTime / 1000, DEC); Serial.println(" seconds");
           firstTime = false;
         }
+        break;
       }
-      break;
     case 3 :
-      break;
+    /*
+     * Yellow and green wipes
+     */
+      {
+        // init for the first time
+        if (firstTime) {
+          holdTime = 1000;
+        }
+
+        if (elapsedTime > holdTime) {
+          k = random(0, NUM_ZONES);
+          red = random(0, 255);
+          green = random(230, 255);
+          blue = random(0, 100);
+          colorWipeZone(k, red, green, blue);
+          elapsedTime -= holdTime;
+          holdTime = random(1000, 10000);
+          Serial.print("hoding time :"); Serial.print(holdTime / 1000, DEC); Serial.println(" seconds");
+          firstTime = false;
+        }
+        break;
+      }
     case 4 :
       break;
     default :
@@ -214,6 +238,41 @@ void loop() {
   }
   showAllZones();
 }
+
+
+//void rainbowZone(int k) {
+//  uint16_t i, j;
+//
+//  //for (j = 0; j < 256; j++) {
+//    for (i = 0; i < ZONES[k]->numZonePixels(); i++) {
+//      //ZONES[k]->setZonePixelColor(i, Wheel((i + j) & 255));
+//      uint32_t c = Wheel((i /* + j */) & 255);
+//      colorWipeZone(k,
+//                    (uint8_t)(c >> 16),
+//                    (uint8_t)(c >>  8),
+//                    (uint8_t)c);
+//    }
+//  //}
+//}
+//
+//
+//// Input a value 0 to 255 to get a color value.
+//// The colours are a transition r - g - b - back to r.
+//uint32_t Wheel(byte WheelPos) {
+//  WheelPos = 255 - WheelPos;
+//  if(WheelPos < 85) {
+//    return ((uint32_t)(255 - WheelPos * 3) << 16) | ((uint32_t) 0 << 8) | (WheelPos * 3);
+//    //return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+//  }
+//  if(WheelPos < 170) {
+//    WheelPos -= 85;
+//    return ((uint32_t)0 << 16) | ((uint32_t)(WheelPos * 3) << 8) | (255 - WheelPos * 3);
+//    //return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+//  }
+//  WheelPos -= 170;
+//  return ((uint32_t)(WheelPos * 3) << 16) | ((uint32_t)(255 - WheelPos * 3) << 8) | 0;
+//  //return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+//}
 
 void initScenario() {
   // Debouncing uninterruptible delay
@@ -224,11 +283,10 @@ void initScenario() {
   sei();
 }
 
-
-void colorWipe(int volumeNumber, int red, int green, int blue) {
-  Serial.print("Volume #"); Serial.println(volumeNumber);
-  Serial.print(red); Serial.print(":"); Serial.print(green); Serial.print(":"); Serial.println(blue);
-  ZONES[volumeNumber]->setZoneColor(red, green, blue);
+void colorWipeZone(int zoneNum, int r, int g, int b) {
+  Serial.print("Volume #"); Serial.println(zoneNum);
+  Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
+  ZONES[zoneNum]->setZoneColor(r, g, b);
 }
 /*
    Propagate White
@@ -253,6 +311,53 @@ boolean propagate_white(int freq) {
   zoneE.setZoneColor(zoneEValue, zoneEValue, zoneEValue);
   zoneF.setZoneColor(zoneFValue, zoneFValue, zoneFValue);
   if (zoneFValue >= 255) {
+    return true;
+  }
+  return false;
+}
+
+/*
+   Propagate White
+*/
+boolean propagate_color(int freq, int r, int g, int b) {
+  float perCent = fmod(millis(), freq) / freq;
+  perCent *= 100.0f;
+
+  float zoneA_r, zoneA_g, zoneA_b,
+        zoneB_r, zoneB_g, zoneB_b,
+        zoneC_r, zoneC_g, zoneC_b,
+        zoneD_r, zoneD_g, zoneD_b,
+        zoneE_r, zoneE_g, zoneE_b,
+        zoneF_r, zoneF_g, zoneF_b;
+
+  zoneA_r = clampMap(perCent,  0,  16,   0, r);
+  zoneB_r = clampMap(perCent,  16,  32,   0, r);
+  zoneC_r = clampMap(perCent,  32, 48,   0, r);
+  zoneD_r = clampMap(perCent,  48,  64,   0, r);
+  zoneE_r = clampMap(perCent,  64,  78,   0, r);
+  zoneF_r = clampMap(perCent,  78,  96,   0, r);
+  zoneA_g = clampMap(perCent,  0,  16,   0, g);
+  zoneB_g = clampMap(perCent,  16,  32,   0, g);
+  zoneC_g = clampMap(perCent,  32, 48,   0, g);
+  zoneD_g = clampMap(perCent,  48,  64,   0, g);
+  zoneE_g = clampMap(perCent,  64,  78,   0, g);
+  zoneF_g = clampMap(perCent,  78,  96,   0, g);
+  zoneA_b = clampMap(perCent,  0,  16,   0, b);
+  zoneB_b = clampMap(perCent,  16,  32,   0, b);
+  zoneC_b = clampMap(perCent,  32, 48,   0, b);
+  zoneD_b = clampMap(perCent,  48,  64,   0, b);
+  zoneE_b = clampMap(perCent,  64,  78,   0, b);
+  zoneF_b = clampMap(perCent,  78,  96,   0, b);
+
+
+  zoneA.setZoneColor(zoneA_r, zoneA_g, zoneA_b);
+  zoneB.setZoneColor(zoneB_r, zoneB_g, zoneB_b);
+  zoneC.setZoneColor(zoneC_r, zoneC_g, zoneC_b);
+  zoneD.setZoneColor(zoneD_r, zoneD_g, zoneD_b);
+  zoneE.setZoneColor(zoneE_r, zoneE_g, zoneE_b);
+  zoneF.setZoneColor(zoneF_r, zoneF_g, zoneF_b);
+
+  if (zoneF_b >= b) {
     return true;
   }
   return false;
