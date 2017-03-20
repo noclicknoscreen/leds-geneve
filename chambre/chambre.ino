@@ -12,12 +12,14 @@
     - Ajouter une lecture de pin digitale pour le contact sec)
 
 *********************************************************************************/
-#include "FastLED.h"
-
-FASTLED_USING_NAMESPACE
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+#include <avr/power.h>
+#endif
 
 // Nombre de zones
-#define NUM_ZONES 25
+#define NUM_ZONES 24
+#define NUM_STRIPS 8
 
 // Signaux de pilotage des zones
 # define PIN_1 3
@@ -56,75 +58,32 @@ FASTLED_USING_NAMESPACE
 #define NUM_LEDS_W 41 // 30 + 11    // OK
 #define NUM_LEDS_X 15               // OK
 
-const int PINS[] = {PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7, PIN_8};
+Adafruit_NeoPixel leds1 = Adafruit_NeoPixel( NUM_LEDS_A, PIN_1 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds2 = Adafruit_NeoPixel( NUM_LEDS_B + NUM_LEDS_C, PIN_2 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds3 = Adafruit_NeoPixel( NUM_LEDS_D + NUM_LEDS_E, PIN_3 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds4 = Adafruit_NeoPixel( NUM_LEDS_F + NUM_LEDS_G + NUM_LEDS_H + NUM_LEDS_I + NUM_LEDS_J + NUM_LEDS_K + NUM_LEDS_L + NUM_LEDS_M + NUM_LEDS_N + NUM_LEDS_O + NUM_LEDS_P + NUM_LEDS_Q + NUM_LEDS_R, PIN_4 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds5 = Adafruit_NeoPixel( NUM_LEDS_S + NUM_LEDS_T, PIN_5 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds6 = Adafruit_NeoPixel( NUM_LEDS_U, PIN_6 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds7 = Adafruit_NeoPixel( NUM_LEDS_V + NUM_LEDS_W, PIN_7 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds8 = Adafruit_NeoPixel( NUM_LEDS_X, PIN_8 ,  NEO_GRB + NEO_KHZ800);
+
+const int PINS[NUM_STRIPS] = {PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7, PIN_8};
 const int NUM_LEDS[] = {
   NUM_LEDS_A, NUM_LEDS_B, NUM_LEDS_C, NUM_LEDS_D,
   NUM_LEDS_E, NUM_LEDS_F, NUM_LEDS_G, NUM_LEDS_H,
   NUM_LEDS_I, NUM_LEDS_J, NUM_LEDS_K, NUM_LEDS_L,
   NUM_LEDS_M, NUM_LEDS_N, NUM_LEDS_O, NUM_LEDS_P,
-  NUM_LEDS_Q, NUM_LEDS_Q2, NUM_LEDS_R, NUM_LEDS_S,
-  NUM_LEDS_T, NUM_LEDS_U, NUM_LEDS_V, NUM_LEDS_W,
-  NUM_LEDS_X
+  NUM_LEDS_Q, NUM_LEDS_R, NUM_LEDS_S, NUM_LEDS_T,
+  NUM_LEDS_U, NUM_LEDS_V, NUM_LEDS_W, NUM_LEDS_X
 };
+int totalNumLeds = 0;
 
-CRGB leds0[NUM_LEDS_A];
-CRGB leds1[NUM_LEDS_B];
-CRGB leds2[NUM_LEDS_C];
-CRGB leds3[NUM_LEDS_D];
-CRGB leds4[NUM_LEDS_E];
-CRGB leds5[NUM_LEDS_F];
-CRGB leds6[NUM_LEDS_G];
-CRGB leds7[NUM_LEDS_H];
-CRGB leds8[NUM_LEDS_I];
-CRGB leds9[NUM_LEDS_J];
-CRGB leds10[NUM_LEDS_K];
-CRGB leds11[NUM_LEDS_L];
-CRGB leds12[NUM_LEDS_M];
-CRGB leds13[NUM_LEDS_N];
-CRGB leds14[NUM_LEDS_O];
-CRGB leds15[NUM_LEDS_P];
-CRGB leds16[NUM_LEDS_Q];
-CRGB leds17[NUM_LEDS_Q2];
-CRGB leds18[NUM_LEDS_R];
-CRGB leds19[NUM_LEDS_S];
-CRGB leds20[NUM_LEDS_T];
-CRGB leds21[NUM_LEDS_U];
-CRGB leds22[NUM_LEDS_V];
-CRGB leds23[NUM_LEDS_W];
-CRGB leds24[NUM_LEDS_X];
+Adafruit_NeoPixel * STRIPS[NUM_ZONES] = {&leds1, &leds2, &leds3, &leds4, &leds5, &leds6, &leds7, &leds8};
 
-
-CRGB * leds[] = {
-  leds0, leds1, leds2, leds3, leds4, leds5, leds6, leds7, leds8, leds9, leds10,
-  leds11, leds12, leds13, leds14, leds15, leds16, leds17, leds18, leds19, leds20,
-  leds21, leds22, leds23, leds24
-};
-
-// Variable de couleur.
-CRGB couleur;
-CRGB couleur_zones[NUM_ZONES];
 
 // Choix du scénario
-char choix = '1';
-
-// Pour les calculs de pulsations
-float heartBeat;
-float heartFreq = 10000;
-
-int brightness_value = 40; // Between 0 and 100 %
-
-#define FRAMES_PER_SECOND 120
-
-/*********************************************************************************
-   Framework FastLED
-*********************************************************************************/
-//void setPixel(int Pixel, byte red, byte green, byte blue, int NumZone) {
-void setPixel(int Pixel, CRGB c, int NumZone) {
-  // FastLED
-  leds[NumZone][Pixel] = c;
-}
-
-#include "scenarii-leds.h"
+int choix = 0;
+int brightness_value = 255;
 
 /*********************************************************************************
    Setup
@@ -132,205 +91,164 @@ void setPixel(int Pixel, CRGB c, int NumZone) {
 void setup()
 {
   Serial.begin(9600);
-  // Correction intéressantes : Candle (intime, plus sur les rouges), Tungsten40W, Tungsten100W, ClearBlueSky (tire sur le vert/bleu)
-  FastLED.addLeds<NEOPIXEL, PIN_1>(leds0, NUM_LEDS[0]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_2>(leds1, NUM_LEDS[1]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_2>(leds2, NUM_LEDS[2]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_3>(leds3, NUM_LEDS[3]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_3>(leds4, NUM_LEDS[4]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds5, NUM_LEDS[5]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds6, NUM_LEDS[6]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds7, NUM_LEDS[7]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds8, NUM_LEDS[8]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds9, NUM_LEDS[9]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds10, NUM_LEDS[10]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds11, NUM_LEDS[11]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds12, NUM_LEDS[12]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds13, NUM_LEDS[13]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds14, NUM_LEDS[14]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds15, NUM_LEDS[15]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds16, NUM_LEDS[16]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_4>(leds17, NUM_LEDS[17]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_5>(leds18, NUM_LEDS[18]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_5>(leds19, NUM_LEDS[19]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_6>(leds20, NUM_LEDS[20]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_6>(leds21, NUM_LEDS[21]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_7>(leds22, NUM_LEDS[22]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_7>(leds23, NUM_LEDS[23]).setCorrection( Tungsten100W );
-  FastLED.addLeds<NEOPIXEL, PIN_8>(leds24, NUM_LEDS[24]).setCorrection( Tungsten100W );
 
+  for (int i = 0; i < NUM_STRIPS; i++) {
+    Serial.print("Init Zone #"); Serial.println(i);
+    pinMode(PINS[i], LOW);
+    STRIPS[i]->begin();
+    STRIPS[i]->setBrightness(brightness_value);
+    setStripColor(STRIPS[i], 0, 0, 0);
 
-  FastLED.setBrightness(brightness_value);
+    // Faire la somme de tous les pixels
+    totalNumLeds += STRIPS[i]->numPixels();
 
-  tout_eteindre();
-
-  // Init de toutes les zones
-  for (uint8_t i = 0; i < NUM_ZONES; i++) {
-    // couleur au hasard
-    allColor(randomColor(), i);
-    delay(30);
-    showStrip();
   }
 
-  // Faire un tableau de couleurs pour certains scénarii
-  for (int n = 0; n < NUM_ZONES; n++) {
-    couleur_zones[n] = randomColor();
-  }
-
-  choix = '0';
+  choix = 0;
+  delay(1000);
 }
 
 /*********************************************************************************
    BOUCLE
  *********************************************************************************/
 void loop() {
-  if (Serial.available()) {
-    choix = Serial.read();
-    Serial.print("\nNouveau choix :"); Serial.println(choix);
+
+
+  // RAINBOW ALL OVER THE SKY -----------------------------------------------------
+  float period = 5000.0f;
+  float timeRatio = fmod(millis(), period) / period;
+  Serial.print("Time = ");
+  Serial.print(timeRatio);  
+
+  //timeRatio = (sin(timeRatio * TWO_PI) + 1) * 0.5f;
+  
+  Serial.print(", after Time = ");
+  Serial.println(timeRatio);  
+
+  for (float i = 0; i < totalNumLeds; i++) {
+    
+    float toWheel = fmod(i + timeRatio * totalNumLeds, totalNumLeds) / totalNumLeds;
+    
+    //toWheel += timeRatio;
+    // Start color = 0 (change it)
+    // Stop color = 255 (Change it)
+    toWheel = 0 + toWheel * 255;
+    
+    setOnePixelOfAll(i / 502, Wheel(toWheel));
+    
   }
-
-  // Choix d'une zone au hasard
-  uint8_t k = random(0, NUM_ZONES);
-
-  // Choix d'un temps d'arrêt aléatoire compris entre 50 ms et 5000ms
-  uint32_t waiting_time = random(500, 10000);
-
-  // Choix d'une couleur au hasard
-  couleur = randomColor();
-
-  // Choix de la brightness
-  brightness_value = random(0, 100);
-
-  // Debug values
-  Serial.println("------------------------------------------------");
-  Serial.print("zone : "); Serial.println(k);
-  Serial.print("Scénario : "); Serial.println(choix);
-  Serial.print("r:"); Serial.print(couleur.r);
-  Serial.print(", g:"); Serial.print(couleur.g);
-  Serial.print(", b:"); Serial.println(couleur.b);
-  Serial.print("Brightness : "); Serial.println(brightness_value);
-  Serial.print("FPS : "); Serial.println(FastLED.getFPS(), DEC);
-  Serial.print("Temps d'attente : "); Serial.println(waiting_time);
-
-  // choix du scénario
-  switch (choix) {
-    case '0' : // Scénario de test des zones
-      FastLED.setBrightness(25);
-      tout_eteindre();
-      Serial.println("------------------------ Test du paramétrage des zones ------------------------");
-      for (int i = 0; i < NUM_ZONES; i++) {
-        Serial.print("zone : "); Serial.println(i);
-        testZone(randomColor(), 125, 1, i);
-      }
-      tout_eteindre();
-      FastLED.setBrightness(25);
-      // Test de toutes les zones comme un seul ruban
-      for (int n = 0; n < NUM_ZONES; n++) {
-        for (int i = 0; i < NUM_LEDS[n]; i++) {
-          leds[n][i] = 0xf0f0f0; // 0xffad08; //couleur_zones[n];
-          showStrip();
-        }
-        delay(MEDIUM);
-      }
-      tout_eteindre();
-      break;
-    case '1' :
-      // Changer une zone au hasard
-      colorWipe(couleur, 50, k);
-      // temps d'arrêt aléatoire compris entre 50 ms et 500ms
-      delay(waiting_time);
-      break;
-    case '2' :
-      // faire scintiller des leds
-      SnowSparkle(CRGB::Yellow, 50, random(100, 1000), k);
-      break;
-    case '3' :
-      // Disolve color to black
-      allRandom(k);
-      delay(waiting_time / 2);
-      disolve(15, 100, 50, k);
-      delay(waiting_time / 2);
-      break;
-    case '4' :  // Flash
-      colorWipe(couleur, 50, k);
-      delay(waiting_time / 2);
-      flash(couleur, 10, 50, k);
-      delay(waiting_time / 2);
-      break;
-    case '5' :  // ColorWipe With Direction
-      colorWipe(couleur, 50, k, BACKWARD);
-      delay(waiting_time);
-      break;
-    case '6' :  // Rainbaw
-      for (int i = 0; i < NUM_ZONES; i++) {
-        rainbow(2, 30, i);
-      }
-      break;
-    case '7' :
-      // theaterChase
-      theaterChase(couleur, 3, 50, k);
-      // theaterChaseRainbow
-      theaterChaseRainbow(1, 50, k);
-      break;
-    case '8' :
-      {
-        // theaterChaseRainbow
-        CRGB oldColor = leds[k][0];
-        lightning(CRGB::White, 20, 50, MEDIUM, k);
-        allColor(oldColor, k);
-        break;
-      }
-    case '9' :  // cyclon
-      for (int i = 0; i < NUM_ZONES; i++) {
-        cylon(couleur, 4, 30, i);
-      }
-      break;
-    case 'A'  :
-      {
-        CRGB couleur2 = randomColor();
-        stripes(couleur, couleur2, 3, k);
-        delay(waiting_time);
-        break;
-      }
-    case 'B' :
-      {
-        //NewKITT(couleur, 4, 50, 50, k);
-        CenterToOutside(couleur, NUM_LEDS[k] % 4, 50, 50, k);
-        OutsideToCenter(couleur, NUM_LEDS[k] % 4, 50, 50, k);
-        allColor(couleur, k);
-      }
-    case 'C' :
-      {
-        // Toutes les zones : éclaraige pulsant sinusoïdale
-        int total_led = 0;
-        // On fait 100 pulsations
-        for (int pulse = 10; pulse < 110; pulse++) {
-          // --- Calculation of heartBeat
-          heartBeat = fmod(millis(), heartFreq) / heartFreq;
-          heartBeat = 0.5f * (sin(TWO_PI * heartBeat) + 1);
-          brightness_value = 100.0f * heartBeat;
-          FastLED.setBrightness(brightness_value);
-          for (int n = 0; n < NUM_ZONES; n++) {
-            total_led += NUM_LEDS[n];
-            for (int i = 0; i < NUM_LEDS[n]; i++) {
-              leds[n][i] = 0xffad08; //couleur_zones[n];
-            }
-          }
-          showStrip();
-          //delay(FASTER);
-        }
-        //couleur_zones[random(NUM_ZONES)] = randomColor();
-      }
-  }
+  
+  showAllStrips();
 
 }
 
-void tout_eteindre() {
+/*****************************************************************
+   Setting all zones to back.
+ *****************************************************************/
+void SetAllZonesToColor(int r, int g, int b) {
   // Tout à noir
-  for (uint16_t i = 0; i < NUM_ZONES; i++) {
-    allColor(CRGB::Black, i);
+  for (int i = 0; i < NUM_STRIPS; i++) {
+    setStripColor(STRIPS[i], r, g, b);
   }
-  showStrip();
+}
+
+void setStripColor(Adafruit_NeoPixel * strip, int r, int g, int b) {
+  for (int i = 0; i < strip->numPixels(); i++) {
+    strip->setPixelColor(i, r, g, b);
+  }
 
 }
+
+/*****************************************************************
+  Showing all zones
+ *****************************************************************/
+void showAllStrips() {
+  // Néopixel
+  for (int i = 0; i < NUM_STRIPS; i++) {
+    STRIPS[i]->show();
+  }
+}
+
+
+/*****************************************************************
+  // Slightly different, this makes the rainbow equally distributed throughout
+ *****************************************************************/
+void rainbowCycle(Adafruit_NeoPixel * strip, uint8_t wait) {
+  uint16_t i, j;
+
+  for (j = 0; j < 256 * 5; j++) { // 5 cycles of all colors on wheel
+    for (i = 0; i < strip->numPixels(); i++) {
+      strip->setPixelColor(i, Wheel(((i * 256 / strip->numPixels()) + j) & 255));
+    }
+    strip->show();
+    delay(wait);
+  }
+}
+
+/*****************************************************************
+  // Input a value 0 to 255 to get a color value.
+  // The colours are a transition r - g - b - back to r.
+ *****************************************************************/
+uint32_t Wheel(byte WheelPos) {
+  Adafruit_NeoPixel strip = Adafruit_NeoPixel();
+  WheelPos = 255 - WheelPos;
+  if (WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if (WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+
+void setOnePixelOfAll(float ratio, uint32_t c) {
+
+  int idxStrip = 0;
+  
+  int tempTotalA = 0;
+  int tempTotalB = 0;
+  
+  float idxPixel = ratio * (float)totalNumLeds;
+
+  for (idxStrip = 0; idxStrip < NUM_STRIPS - 1; idxStrip++) {
+
+    tempTotalA += STRIPS[idxStrip]->numPixels();
+    
+    if (tempTotalA > idxPixel) {
+      // On sort
+      break;
+    }
+    
+    tempTotalB += STRIPS[idxStrip]->numPixels();
+    
+  }
+
+/*
+  Serial.print("ratio = " );
+  Serial.print(ratio);
+  
+  Serial.print(", tempTotalA = " );
+  Serial.print(tempTotalA);
+  
+  Serial.print(", tempTotalB = " );
+  Serial.print(tempTotalB);
+
+  Serial.print(", idxPixel = " );
+  Serial.print(idxPixel);
+
+  Serial.print(", idxRelatif = " );
+  Serial.print(idxPixel - tempTotalB);
+
+  Serial.print(", idxStrip = " );
+  Serial.println(idxStrip);
+  
+  Serial.println("--------------");
+*/
+  // Chooooose the color
+  STRIPS[idxStrip]->setPixelColor(idxPixel - tempTotalB, c);
+
+}
+
 
