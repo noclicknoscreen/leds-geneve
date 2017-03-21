@@ -77,10 +77,7 @@ const int PINS[NUM_ZONES] = {PIN_ZONE_A, PIN_ZONE_B, PIN_ZONE_C, PIN_ZONE_D, PIN
 
 Zone * ZONES[NUM_ZONES] = {&zoneA, &zoneB, &zoneC, &zoneD, &zoneE, &zoneF};
 
-Adafruit_NeoPixel * STRIPS[NUM_ZONES] = {&pixels_A, &pixels_B, &pixels_C, &pixels_D, &pixels_E, &pixels_F};
-
-// Nb total de leds
-int totalNumLeds = 0;
+//Adafruit_NeoPixel * STRIPS[NUM_ZONES] = {&pixels_A, &pixels_B, &pixels_C, &pixels_D, &pixels_E, &pixels_F};
 
 int brightness_value = 255; // Between 0 and 100 %
 
@@ -90,6 +87,8 @@ int k = 0;
 int red = 255;
 int green = 255;
 int blue = 255;
+
+String stripOrZone = "ZONE";
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -100,6 +99,13 @@ void setup()
 #endif
   Serial.begin(9600);
   Serial.println("___ENTERING SETUP___");
+
+  STRIPS[0] = &pixels_A;
+  STRIPS[1] = &pixels_B;
+  STRIPS[2] = &pixels_C;
+  STRIPS[3] = &pixels_D;
+  STRIPS[4] = &pixels_E;
+  STRIPS[5] = &pixels_F;
 
   for (int i = 0; i < NUM_STRIPS; i++) {
     Serial.print("Init Zone #"); Serial.println(i);
@@ -126,15 +132,6 @@ void setup()
   pinMode(PIN_SC3, INPUT_PULLUP); // dry contact
   pinMode(PIN_SC4, INPUT_PULLUP); // dry contact
 
-  /*
-    // Interruptions sur les pins de choix de scénario
-    //RISING/HIGH/CHANGE/LOW/FALLING
-    attachInterrupt (PIN_SC1, choix1, RISING);
-    attachInterrupt (PIN_SC2, choix2, RISING);
-    attachInterrupt (PIN_SC3, choix3, RISING);
-    attachInterrupt (PIN_SC4, choix4, RISING);
-  */
-
   showAllZones();
 
   // Init some random values
@@ -159,21 +156,12 @@ void loop() {
   // choix du scénario
   switch (choix) {
     case 0 : // Scénario de test des zones
-//      if (firstTime) {
-//        Serial.println("Scénario #0, propagate white. Transition to #1");
-//        firstTime = false;
-//      }
-//
-//      if (propagate_color(5000, 255, 255, 255)) {
-//        choix = 1;
-//        initScenario();
-//      }
       break;
     case 1 :
       if (firstTime) {
         Serial.println("Scénario #1, some fixed white colors.");
         firstTime = propagate_color(5000, 255, 255, 255);
-        
+        stripOrZone = "ZONE";
       } else {
         zoneA.setZoneColor(255, 255, 255);
         zoneB.setZoneColor(175, 60, 190);
@@ -192,6 +180,7 @@ void loop() {
         if (firstTime) {
           Serial.println("Scénario #2, random colors in random zones, with a randomized hold time.");
           holdTime = 1000;
+          stripOrZone = "ZONE";
           red = random(0, 255);
           green = random(0, 255);
           blue = random(0, 255);
@@ -216,6 +205,7 @@ void loop() {
         if (firstTime) {
           Serial.println("Scénario #3, random green hues in random zones, with a randomized hild time.");
           holdTime = 1000;
+          stripOrZone = "ZONE";
           red = random(0, 255);
           green = random(230, 255);
           blue = random(0, 100);
@@ -240,13 +230,10 @@ void loop() {
         if (firstTime) {
           Serial.println("Scénario #4, Rainbow.");
           holdTime = 1000;
+          stripOrZone = "STRIP";
           firstTime = false;
-        }
-
-        if (elapsedTime > holdTime) {
-          elapsedTime -= holdTime;
-          holdTime = random(1000, 10000);
-          Serial.print("hoding time :"); Serial.print(holdTime / 1000, DEC); Serial.println(" seconds");
+        } else {
+          constrainedRainbow(25, 120, 6000.0f);
         }
         break;
       }
@@ -258,6 +245,11 @@ void loop() {
           // All the light OFF
           for (int i = 0; i < NUM_ZONES; i++) {
             ZONES[i]->setZoneColor(0, 0, 0);
+            stripOrZone = "ZONE";
+          }
+          for (int i = 0; i < NUM_STRIPS; i++) {
+            SetAllStripsToColor(0, 0, 0);
+            stripOrZone = "STRIP";
           }
         }
         break;
@@ -266,7 +258,11 @@ void loop() {
       choix = 1;
       break;
   }
-  showAllZones();
+  if (stripOrZone == "ZONE") {
+    showAllZones();
+  } else {
+    showAllStrips();
+  }
 
   // Read the 4 inputs to decide what to do
   read_choice();
@@ -334,19 +330,4 @@ void showAllZones() {
   }
 }
 
-void showAllStrips() {
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    STRIPS[i]->show();
-  }
-}
-
-/*****************************************************************
-   Setting all zones to a specific color.
- *****************************************************************/
-void SetAllZonesToColor(int r, int g, int b) {
-  // Tout à noir
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    setStripColor(STRIPS[i], r, g, b);
-  }
-}
 
