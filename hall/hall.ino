@@ -88,7 +88,7 @@ int red = 255;
 int green = 255;
 int blue = 255;
 
-String stripOrZone = "ZONE";
+int refreshMode = ZONE_MODE;
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -161,7 +161,7 @@ void loop() {
       if (firstTime) {
         Serial.println("Scénario #1, some fixed white colors.");
         firstTime = propagate_color(5000, 255, 255, 255);
-        stripOrZone = "ZONE";
+        refreshMode = ZONE_MODE;
       } else {
         zoneA.setZoneColor(255, 255, 255);
         zoneB.setZoneColor(175, 60, 190);
@@ -180,7 +180,7 @@ void loop() {
         if (firstTime) {
           Serial.println("Scénario #2, random colors in random zones, with a randomized hold time.");
           holdTime = 1000;
-          stripOrZone = "ZONE";
+          refreshMode = ZONE_MODE;
           red = random(0, 255);
           green = random(0, 255);
           blue = random(0, 255);
@@ -205,7 +205,7 @@ void loop() {
         if (firstTime) {
           Serial.println("Scénario #3, random green hues in random zones, with a randomized hild time.");
           holdTime = 1000;
-          stripOrZone = "ZONE";
+          refreshMode = ZONE_MODE;
           red = random(0, 255);
           green = random(230, 255);
           blue = random(0, 100);
@@ -230,7 +230,7 @@ void loop() {
         if (firstTime) {
           Serial.println("Scénario #4, Rainbow.");
           holdTime = 1000;
-          stripOrZone = "STRIP";
+          refreshMode   = STRIP_MODE;
           firstTime = false;
         } else {
           constrainedRainbow(25, 120, 6000.0f);
@@ -245,11 +245,11 @@ void loop() {
           // All the light OFF
           for (int i = 0; i < NUM_ZONES; i++) {
             ZONES[i]->setZoneColor(0, 0, 0);
-            stripOrZone = "ZONE";
+            refreshMode = ZONE_MODE;
           }
           for (int i = 0; i < NUM_STRIPS; i++) {
             SetAllStripsToColor(0, 0, 0);
-            stripOrZone = "STRIP";
+            refreshMode = STRIP_MODE;
           }
         }
         break;
@@ -258,7 +258,7 @@ void loop() {
       choix = 1;
       break;
   }
-  if (stripOrZone == "ZONE") {
+  if (refreshMode == ZONE_MODE) {
     showAllZones();
   } else {
     showAllStrips();
