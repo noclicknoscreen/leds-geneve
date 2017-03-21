@@ -21,6 +21,14 @@
 #define NUM_ZONES 24
 #define NUM_STRIPS 8
 
+// Signaux de pilotage des scénarii
+#define PIN_SC1 7
+#define PIN_SC2 8
+#define PIN_SC3 A0
+#define PIN_SC4 A1
+
+#include <ncns-leds-lib.h>
+
 // Signaux de pilotage des zones
 # define PIN_1 3
 # define PIN_2 4
@@ -76,13 +84,9 @@ const int NUM_LEDS[] = {
   NUM_LEDS_Q, NUM_LEDS_R, NUM_LEDS_S, NUM_LEDS_T,
   NUM_LEDS_U, NUM_LEDS_V, NUM_LEDS_W, NUM_LEDS_X
 };
-int totalNumLeds = 0;
 
-Adafruit_NeoPixel * STRIPS[NUM_ZONES] = {&leds1, &leds2, &leds3, &leds4, &leds5, &leds6, &leds7, &leds8};
+//Adafruit_NeoPixel * STRIPS[NUM_ZONES] = {&leds1, &leds2, &leds3, &leds4, &leds5, &leds6, &leds7, &leds8};
 
-
-// Choix du scénario
-int choix = 0;
 int brightness_value = 255;
 
 /*********************************************************************************
@@ -91,6 +95,17 @@ int brightness_value = 255;
 void setup()
 {
   Serial.begin(9600);
+
+  // STRIPS = {&leds1, &leds2, &leds3, &leds4, &leds5, &leds6, &leds7, &leds8};
+  STRIPS[0] = &leds1;
+  STRIPS[1] = &leds2;
+  STRIPS[2] = &leds3;
+  STRIPS[3] = &leds4;
+  STRIPS[4] = &leds5;
+  STRIPS[5] = &leds6;
+  STRIPS[6] = &leds7;
+  STRIPS[7] = &leds8;
+
 
   for (int i = 0; i < NUM_STRIPS; i++) {
     Serial.print("Init Zone #"); Serial.println(i);
@@ -113,141 +128,8 @@ void setup()
  *********************************************************************************/
 void loop() {
 
-
-  // RAINBOW ALL OVER THE SKY -----------------------------------------------------
-  float period = 5000.0f;
-  float timeRatio = fmod(millis(), period) / period;
-  Serial.print("Time = ");
-  Serial.print(timeRatio);  
-
-  //timeRatio = (sin(timeRatio * TWO_PI) + 1) * 0.5f;
-  
-  Serial.print(", after Time = ");
-  Serial.println(timeRatio);  
-
-  for (float i = 0; i < totalNumLeds; i++) {
-    
-    float toWheel = fmod(i + timeRatio * totalNumLeds, totalNumLeds) / totalNumLeds;
-    
-    //toWheel += timeRatio;
-    // Start color = 0 (change it)
-    // Stop color = 255 (Change it)
-    toWheel = 0 + toWheel * 255;
-    
-    setOnePixelOfAll(i / 502, Wheel(toWheel));
-    
-  }
-  
+  constrainedRainbow(10, 70, 10000.0f);
   showAllStrips();
-
-}
-
-/*****************************************************************
-   Setting all zones to back.
- *****************************************************************/
-void SetAllZonesToColor(int r, int g, int b) {
-  // Tout à noir
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    setStripColor(STRIPS[i], r, g, b);
-  }
-}
-
-void setStripColor(Adafruit_NeoPixel * strip, int r, int g, int b) {
-  for (int i = 0; i < strip->numPixels(); i++) {
-    strip->setPixelColor(i, r, g, b);
-  }
-
-}
-
-/*****************************************************************
-  Showing all zones
- *****************************************************************/
-void showAllStrips() {
-  // Néopixel
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    STRIPS[i]->show();
-  }
-}
-
-
-/*****************************************************************
-  // Slightly different, this makes the rainbow equally distributed throughout
- *****************************************************************/
-void rainbowCycle(Adafruit_NeoPixel * strip, uint8_t wait) {
-  uint16_t i, j;
-
-  for (j = 0; j < 256 * 5; j++) { // 5 cycles of all colors on wheel
-    for (i = 0; i < strip->numPixels(); i++) {
-      strip->setPixelColor(i, Wheel(((i * 256 / strip->numPixels()) + j) & 255));
-    }
-    strip->show();
-    delay(wait);
-  }
-}
-
-/*****************************************************************
-  // Input a value 0 to 255 to get a color value.
-  // The colours are a transition r - g - b - back to r.
- *****************************************************************/
-uint32_t Wheel(byte WheelPos) {
-  Adafruit_NeoPixel strip = Adafruit_NeoPixel();
-  WheelPos = 255 - WheelPos;
-  if (WheelPos < 85) {
-    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if (WheelPos < 170) {
-    WheelPos -= 85;
-    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-}
-
-void setOnePixelOfAll(float ratio, uint32_t c) {
-
-  int idxStrip = 0;
-  
-  int tempTotalA = 0;
-  int tempTotalB = 0;
-  
-  float idxPixel = ratio * (float)totalNumLeds;
-
-  for (idxStrip = 0; idxStrip < NUM_STRIPS - 1; idxStrip++) {
-
-    tempTotalA += STRIPS[idxStrip]->numPixels();
-    
-    if (tempTotalA > idxPixel) {
-      // On sort
-      break;
-    }
-    
-    tempTotalB += STRIPS[idxStrip]->numPixels();
-    
-  }
-
-/*
-  Serial.print("ratio = " );
-  Serial.print(ratio);
-  
-  Serial.print(", tempTotalA = " );
-  Serial.print(tempTotalA);
-  
-  Serial.print(", tempTotalB = " );
-  Serial.print(tempTotalB);
-
-  Serial.print(", idxPixel = " );
-  Serial.print(idxPixel);
-
-  Serial.print(", idxRelatif = " );
-  Serial.print(idxPixel - tempTotalB);
-
-  Serial.print(", idxStrip = " );
-  Serial.println(idxStrip);
-  
-  Serial.println("--------------");
-*/
-  // Chooooose the color
-  STRIPS[idxStrip]->setPixelColor(idxPixel - tempTotalB, c);
 
 }
 
