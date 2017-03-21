@@ -12,9 +12,19 @@
 
 // Nombre de zones
 #define NUM_ZONES 7
+#define NUM_STRIPS 7
+
+// Signaux de pilotage des scénarii
+#define PIN_SC1 7
+#define PIN_SC2 8
+#define PIN_SC3 A0
+#define PIN_SC4 A1
+
+#include <ncns-leds-lib.h>
 
 // on board Led
 #define TEENSY_LED 13
+
 // Signaux de pilotage des zones
 # define PIN_ZONE_A 3
 # define PIN_ZONE_B 4
@@ -54,13 +64,12 @@ Zone zoneG = Zone(&pixels_G, 1, NUM_LEDS_G);
 
 Zone * ZONES[NUM_ZONES] = {&zoneA, &zoneB, &zoneC, &zoneD, &zoneE, &zoneF, &zoneG};
 
-Adafruit_NeoPixel * STRIPS[NUM_ZONES] = {&pixels_A, &pixels_B, &pixels_C, &pixels_D, &pixels_E, &pixels_F, &pixels_G};
-
-// Choix du scénario
-int choix = 0;
+//Adafruit_NeoPixel * STRIPS[NUM_ZONES] = {&pixels_A, &pixels_B, &pixels_C, &pixels_D, &pixels_E, &pixels_F, &pixels_G};
 
 int brightness_value = 255; // Between 0 and 100 %
+int intervall = 0;
 
+int refreshMode = ZONE_MODE;
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -72,7 +81,21 @@ void setup()
   Serial.begin(9600);
   Serial.println("___ENTERING SETUP___");
 
+  STRIPS[0] = &pixels_A;
+  STRIPS[1] = &pixels_B;
+  STRIPS[2] = &pixels_C;
+  STRIPS[3] = &pixels_D;
+  STRIPS[4] = &pixels_E;
+  STRIPS[5] = &pixels_F;
+  STRIPS[6] = &pixels_G;
+
   pinMode(TEENSY_LED, HIGH);
+
+  // Pin de pilotage des scénarii
+  pinMode(PIN_SC1, INPUT_PULLUP); // dry contact
+  pinMode(PIN_SC2, INPUT_PULLUP); // dry contact
+  pinMode(PIN_SC3, INPUT_PULLUP); // dry contact
+  pinMode(PIN_SC4, INPUT_PULLUP); // dry contact
 
   for (int i = 0; i < NUM_ZONES; i++) {
     Serial.print("Init Zone #"); Serial.println(i);
@@ -80,12 +103,14 @@ void setup()
     STRIPS[i]->begin();
     STRIPS[i]->setBrightness(brightness_value);
     ZONES[i]->setZoneBrightness(brightness_value);
+    // Faire la somme de tous les pixels
+    totalNumLeds += STRIPS[i]->numPixels();
   }
 
-  SetAllZonesToBlack();
+  SetAllZonesToColor(0, 0, 0);
   showAllZones();
 
-  choix = 0;
+  choix = 5;
   Serial.println("___END SETUP___");
 }
 
@@ -98,60 +123,75 @@ void loop() {
 
   // choix du scénario
   switch (choix) {
-    case 0 : // Scénario de test des zones
-      Serial.println("Scénario 0");
-      for (int i = 0; i < NUM_ZONES; i++) {
-        ZONES[i]->setZoneColor(255, 255, 255);
-      }
-      break;
     case 1 :
-      Serial.println("Scénario 1");
-      for (int i = 0; i < NUM_ZONES; i++) {
-        ZONES[i]->setZoneColor(175, 60, 190);
+      if (firstTime) {
+        Serial.println("Scénario 1 : Blanc violacé");
+        firstTime = false;
+        holdTime = 100;
+        intervall = 10;
+        refreshMode = STRIP_MODE;
+      }
+      if (elapsedTime > holdTime && intervall > 0) {
+        setColorOneLedEvery(intervall, 175, 60, 190);
+        elapsedTime -= holdTime;
+        intervall--;
+      }
+      //SetAllZonesToColor(175, random(50, 65), 190);
+      break;
+    case 2 :
+      if (firstTime) {
+        Serial.println("Scénario 2 : Blanc pur");
+        firstTime = false;
+        refreshMode = ZONE_MODE;
+      }
+      SetAllZonesToColor(255, 255, 255);
+      break;
+    case 3 :
+      if (firstTime) {
+        Serial.println("Scénario 3 : Blanc tirant sur le vert");
+        firstTime = false;
+        refreshMode = ZONE_MODE;
+      }
+      SetAllZonesToColor(random(100, 150), 255, 230);
+      break;
+    case 4 :
+      if (firstTime) {
+        Serial.println("Scénario 4 : Blanc pur");
+        firstTime = false;
+        refreshMode = ZONE_MODE;
+      }
+      SetAllZonesToColor(255, 255, 255);
+    case 5 :
+      if (firstTime) {
+        Serial.println("Scénario #5, All the lights to black.");
+        firstTime = false;
+        // All the light OFF
+        SetAllZonesToColor(0, 0, 0);
+        for (int i = 0; i < NUM_STRIPS; i++) {
+          SetAllStripsToColor(0, 0, 0);
+        }
       }
       break;
     default :
-      choix = 0;
+      choix = 1;
   }
-  showAllZones();
-}
-
-
-/*
-           for ( int i = 0; i < NUM_ZONES; i++) {
-            for (int p = 0; p < STRIPS[i]->numPixels(); p++) {
-              if (p % 6 == 0 ) {
-                Serial.print("Strip #"); Serial.print(i);
-                Serial.print(", Led #"); Serial.println(p);
-                STRIPS[i]->setPixelColor(p, 255, 255, 255);
-              } else {
-                STRIPS[i]->setPixelColor(p, 0, 0, 0);
-              }
-            }
-            //}
-          }
-
- */
-/*****************************************************************
-   Binking function for onboard LED
- *****************************************************************/
-void board_blinking(int freq) {
-  int myMillis = millis();
-  myMillis %= 2 * freq;
-  if (myMillis >= freq) {
-    digitalWrite(TEENSY_LED, HIGH);
+  if (refreshMode == ZONE_MODE) {
+    showAllZones();
   } else {
-    digitalWrite(TEENSY_LED, LOW);
+    showAllStrips();
   }
+
+  // Reading choice
+  read_choice();
 }
 
 /*****************************************************************
    Setting all zones to back.
  *****************************************************************/
-void SetAllZonesToBlack() {
+void SetAllZonesToColor(int r, int g, int b) {
   // Tout à noir
   for (int i = 0; i < NUM_ZONES; i++) {
-    ZONES[i]->setZoneColor(0, 0, 0);
+    ZONES[i]->setZoneColor(r, g, b);
   }
 }
 
@@ -164,5 +204,4 @@ void showAllZones() {
     ZONES[i]->show();
   }
 }
-
 
