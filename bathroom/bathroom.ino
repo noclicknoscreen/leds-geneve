@@ -19,7 +19,7 @@
 #endif
 
 // Nombre de zones
-#define NUM_ZONES 24
+#define NUM_ZONES 8
 #define NUM_STRIPS 8
 
 // Signaux de pilotage des scénarii
@@ -42,64 +42,33 @@
 
 // Definir les 6 zones a eclairer
 // Valeurs réelles
-#define NUM_LEDS_A 15               // OK
-#define NUM_LEDS_B 44               // OK
-#define NUM_LEDS_C 43               // OK
-#define NUM_LEDS_D 44 // 28 + 16    // OK
-#define NUM_LEDS_E 33 // 27 + 6     // OK
-#define NUM_LEDS_F 9  // 2 + 7      // OK
-#define NUM_LEDS_G 19               // OK
-#define NUM_LEDS_H 9                // OK 
-#define NUM_LEDS_I 8                // OK 
-#define NUM_LEDS_J 5 // 3 + 2       // OK
-#define NUM_LEDS_K 8 //             // OK
-#define NUM_LEDS_L 6 // 2 + 4       // OK
-#define NUM_LEDS_M 5 // 2 + 3       // OK 
-#define NUM_LEDS_N 9 // 4 + 5       // OK
-#define NUM_LEDS_O 8                // OK
-#define NUM_LEDS_P 6 // 3 + 3       // OK
-#define NUM_LEDS_Q 20               // OK
-#define NUM_LEDS_R 16 // 8 + 8      // OK
-#define NUM_LEDS_S 26               // OK
-#define NUM_LEDS_T 29               // OK 
-#define NUM_LEDS_U 40 // 19 + 21    // OK
-#define NUM_LEDS_V 44               // OK
-#define NUM_LEDS_W 41 // 30 + 11    // OK
-#define NUM_LEDS_X 15               // OK
+#define NUM_LEDS_V01 // 43 + 
+#define NUM_LEDS_V02 60 // + 51
+#define NUM_LEDS_V03 60 // 32 +
+#define NUM_LEDS_V04 79 // 34 + 38 + 7 OK
+#define NUM_LEDS_V05 57 // 5 + 52   OK
+#define NUM_LEDS_V06 60 // 23 + 
+#define NUM_LEDS_V07 60 // 41 + 
+#define NUM_LEDS_V08 64 // 57 + 7   OK
 
-Adafruit_NeoPixel leds1 = Adafruit_NeoPixel( NUM_LEDS_A, PIN_1 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds2 = Adafruit_NeoPixel( NUM_LEDS_B + NUM_LEDS_C, PIN_2 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds3 = Adafruit_NeoPixel( NUM_LEDS_D + NUM_LEDS_E, PIN_3 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds4 = Adafruit_NeoPixel( NUM_LEDS_F + NUM_LEDS_G + NUM_LEDS_H + NUM_LEDS_I + NUM_LEDS_J + NUM_LEDS_K + NUM_LEDS_L + NUM_LEDS_M + NUM_LEDS_N + NUM_LEDS_O + NUM_LEDS_P + NUM_LEDS_Q + NUM_LEDS_R, PIN_4 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds5 = Adafruit_NeoPixel( NUM_LEDS_S + NUM_LEDS_T, PIN_5 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds6 = Adafruit_NeoPixel( NUM_LEDS_U, PIN_6 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds7 = Adafruit_NeoPixel( NUM_LEDS_V + NUM_LEDS_W, PIN_7 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds8 = Adafruit_NeoPixel( NUM_LEDS_X, PIN_8 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds1 = Adafruit_NeoPixel( NUM_LEDS_V01, PIN_1 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds2 = Adafruit_NeoPixel( NUM_LEDS_V02, PIN_2 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds3 = Adafruit_NeoPixel( NUM_LEDS_V03, PIN_3 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds4 = Adafruit_NeoPixel( NUM_LEDS_V04, PIN_4 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds5 = Adafruit_NeoPixel( NUM_LEDS_V05, PIN_5 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds6 = Adafruit_NeoPixel( NUM_LEDS_V06, PIN_6 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds7 = Adafruit_NeoPixel( NUM_LEDS_V07, PIN_7 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds8 = Adafruit_NeoPixel( NUM_LEDS_V08, PIN_8 ,  NEO_GRB + NEO_KHZ800);
 
-Zone zoneA = Zone(&leds1, 1, NUM_LEDS_A);
-Zone zoneB = Zone(&leds2, 1, NUM_LEDS_B);
-Zone zoneC = Zone(&leds2, 1, NUM_LEDS_C);
-Zone zoneD = Zone(&leds3, 1, NUM_LEDS_D);
-Zone zoneE = Zone(&leds3, 1, NUM_LEDS_E);
-Zone zoneF = Zone(&leds4, 1, NUM_LEDS_F);
-Zone zoneG = Zone(&leds4, 1, NUM_LEDS_G);
-Zone zoneH = Zone(&leds4, 1, NUM_LEDS_H);
-Zone zoneI = Zone(&leds4, 1, NUM_LEDS_I);
-Zone zoneJ = Zone(&leds4, 1, NUM_LEDS_J);
-Zone zoneK = Zone(&leds4, 1, NUM_LEDS_K);
-Zone zoneL = Zone(&leds4, 1, NUM_LEDS_L);
-Zone zoneM = Zone(&leds4, 1, NUM_LEDS_M);
-Zone zoneN = Zone(&leds4, 1, NUM_LEDS_N);
-Zone zoneO = Zone(&leds4, 1, NUM_LEDS_O);
-Zone zoneP = Zone(&leds4, 1, NUM_LEDS_P);
-Zone zoneQ = Zone(&leds4, 1, NUM_LEDS_Q);
-Zone zoneR = Zone(&leds4, 1, NUM_LEDS_R);
-Zone zoneS = Zone(&leds5, 1, NUM_LEDS_S);
-Zone zoneT = Zone(&leds5, 1, NUM_LEDS_T);
-Zone zoneU = Zone(&leds6, 1, NUM_LEDS_U);
-Zone zoneV = Zone(&leds7, 1, NUM_LEDS_V);
-Zone zoneW = Zone(&leds7, 1, NUM_LEDS_W);
-Zone zoneX = Zone(&leds8, 1, NUM_LEDS_X);
+Zone zoneA = Zone(&leds1, 1, NUM_LEDS_3B);
+Zone zoneB = Zone(&leds2, 1, NUM_LEDS_2C);
+Zone zoneC = Zone(&leds2, 1, NUM_LEDS_2B);
+Zone zoneD = Zone(&leds3, 1, NUM_LEDS_1C);
+Zone zoneE = Zone(&leds3, 1, NUM_LEDS_4A);
+Zone zoneF = Zone(&leds4, 1, NUM_LEDS_4AB);
+Zone zoneG = Zone(&leds4, 1, NUM_LEDS_1A);
+Zone zoneH = Zone(&leds4, 1, NUM_LEDS_2A);
+
 
 Zone * ZONES[NUM_ZONES] = {
   &zoneA, &zoneB, &zoneC, &zoneD, &zoneE, &zoneF, &zoneG, &zoneH,
@@ -109,10 +78,11 @@ Zone * ZONES[NUM_ZONES] = {
 
 const int PINS[NUM_STRIPS] = {PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7, PIN_8};
 const int NUM_LEDS[] = {
-  NUM_LEDS_A, NUM_LEDS_B, NUM_LEDS_C, NUM_LEDS_D,
-  NUM_LEDS_E, NUM_LEDS_F, NUM_LEDS_G, NUM_LEDS_H,
-  NUM_LEDS_I, NUM_LEDS_J, NUM_LEDS_K, NUM_LEDS_L,
-  NUM_LEDS_M, NUM_LEDS_N, NUM_LEDS_O, NUM_LEDS_P,
+  NUM_LEDS_3B, NUM_LEDS_2C, NUM_LEDS_2B, NUM_LEDS_1C,
+  NUM_LEDS_4A, N
+  UM_LEDS_F, NUM_LEDS_1A, NUM_LEDS_2A,
+  NUM_LEDS_3A, NUM_LEDS_3C, NUM_LEDS_K, NUM_LEDS_4C,
+  NUM_LEDS_3AB, NUM_LEDS_3A, NUM_LEDS_4CB, NUM_LEDS_P,
   NUM_LEDS_Q, NUM_LEDS_R, NUM_LEDS_S, NUM_LEDS_T,
   NUM_LEDS_U, NUM_LEDS_V, NUM_LEDS_W, NUM_LEDS_X
 };

@@ -108,7 +108,8 @@ void setup()
 #endif
 
   Serial.begin(9600);
-
+  pinMode(13, OUTPUT); // dry contact
+  
   // Pin de pilotage des scénarii
   pinMode(PIN_SC1, INPUT_PULLUP); // dry contact
   pinMode(PIN_SC2, INPUT_PULLUP); // dry contact
@@ -167,6 +168,15 @@ void setup()
  *********************************************************************************/
 void loop() {
 
+  if((millis() % 500) > 250){
+    digitalWrite(13, HIGH);
+  }else{
+    digitalWrite(13, LOW);
+  }
+  Serial.print("choix = ");
+  Serial.print(choix);
+  Serial.println();
+  
   // Choix d'une zone au hasard
   uint8_t k = random(0, NUM_ZONES);
 
