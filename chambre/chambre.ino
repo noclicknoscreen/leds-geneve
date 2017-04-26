@@ -18,6 +18,12 @@
 #include <avr/power.h>
 #endif
 
+// Mode TEST : Décommenter cette ligne
+//#define TEST_MODE 2
+// 1 = Test des zones
+// 2 = Test des Strips
+//---------------------------------------
+
 // Nombre de zones
 #define NUM_ZONES 24
 #define NUM_STRIPS 8
@@ -130,6 +136,11 @@ int green = 255;
 int blue = 255;
 
 int intervall = 0;
+
+#ifdef TEST_MODE
+int testIdx = 0;
+#endif
+
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -172,6 +183,14 @@ void setup()
  *********************************************************************************/
 void loop() {
   board_blinking(500);
+
+  // Mode TEST
+  // Tester toutes les zones à chaque appuie sur la touche 'T'
+#ifdef TEST_MODE
+  testerZonesEtStrips();
+#endif
+
+#ifndef TEST_MODE
 
   // choix du scénario
   switch (choix) {
@@ -282,6 +301,8 @@ void loop() {
 
   // Reading choice
   read_choice();
+#endif
+
 }
 
 
@@ -355,4 +376,51 @@ void showAllZones() {
     ZONES[i]->show();
   }
 }
+
+
+#ifdef TEST_MODE
+void testerZonesEtStrips() {
+  if (TEST_MODE == 1) {
+    char c = Serial.read();
+    if (c == 'T') {
+      testIdx++;
+      if (testIdx >= NUM_ZONES) {
+        testIdx = 0;
+      }
+      Serial.print("============= Begin Test Zone #");
+      Serial.print(testIdx);
+      Serial.println(" ===============");
+    }
+    Serial.print("Testing Zone #"); Serial.print(testIdx);
+    Serial.print(NUM_LEDS[testIdx]); Serial.println(" leds");Serial.print(", ");
+    SetAllZonesToColor(0, 0, 0);
+    showAllZones();
+    delay(500);
+    ZONES[testIdx]->setZoneColor(255, 255, 0);
+    showAllZones();
+    delay(500);
+  }
+  else {
+    char c = Serial.read();
+    if (c == 'T') {
+      testIdx++;
+      if (testIdx >= NUM_STRIPS) {
+        testIdx = 0;
+      }
+      Serial.print("============= Begin Test Strip #");
+      Serial.print(testIdx);
+      Serial.println(" ===============");
+    }
+    Serial.print("Testing Strip #"); Serial.print(testIdx);Serial.print(", ");
+    Serial.print(STRIPS[testIdx]->numPixels());
+    Serial.println(" leds");
+    SetAllStripsToColor(0, 0, 0);
+    showAllStrips();
+    delay(500);
+    setStripColor(STRIPS[testIdx], 255, 255, 0);
+    showAllStrips();
+    delay(500);
+  }
+}
+#endif
 
