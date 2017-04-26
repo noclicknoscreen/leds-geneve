@@ -13,14 +13,13 @@
 
 *********************************************************************************/
 #include <Adafruit_NeoPixel.h>
-#include <Zones.h>
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
 
 // Nombre de zones
-#define NUM_ZONES 8
 #define NUM_STRIPS 8
+#define NUM_ZONES 8
 
 // Signaux de pilotage des scénarii
 #define PIN_SC1 7
@@ -42,7 +41,7 @@
 
 // Definir les 6 zones a eclairer
 // Valeurs réelles
-#define NUM_LEDS_V01 // 43 + 
+#define NUM_LEDS_V01 43 // 43 + 
 #define NUM_LEDS_V02 60 // + 51
 #define NUM_LEDS_V03 60 // 32 +
 #define NUM_LEDS_V04 79 // 34 + 38 + 7 OK
@@ -51,43 +50,34 @@
 #define NUM_LEDS_V07 60 // 41 + 
 #define NUM_LEDS_V08 64 // 57 + 7   OK
 
-Adafruit_NeoPixel leds1 = Adafruit_NeoPixel( NUM_LEDS_V01, PIN_1 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds2 = Adafruit_NeoPixel( NUM_LEDS_V02, PIN_2 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds3 = Adafruit_NeoPixel( NUM_LEDS_V03, PIN_3 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds4 = Adafruit_NeoPixel( NUM_LEDS_V04, PIN_4 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds5 = Adafruit_NeoPixel( NUM_LEDS_V05, PIN_5 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds6 = Adafruit_NeoPixel( NUM_LEDS_V06, PIN_6 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds7 = Adafruit_NeoPixel( NUM_LEDS_V07, PIN_7 ,  NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel leds8 = Adafruit_NeoPixel( NUM_LEDS_V08, PIN_8 ,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds1 = Adafruit_NeoPixel( NUM_LEDS_V01, PIN_1,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds2 = Adafruit_NeoPixel( NUM_LEDS_V02, PIN_2,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds3 = Adafruit_NeoPixel( NUM_LEDS_V03, PIN_3,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds4 = Adafruit_NeoPixel( NUM_LEDS_V04, PIN_4,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds5 = Adafruit_NeoPixel( NUM_LEDS_V05, PIN_5,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds6 = Adafruit_NeoPixel( NUM_LEDS_V06, PIN_6,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds7 = Adafruit_NeoPixel( NUM_LEDS_V07, PIN_7,  NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds8 = Adafruit_NeoPixel( NUM_LEDS_V08, PIN_8,  NEO_GRB + NEO_KHZ800);
 
-Zone zoneA = Zone(&leds1, 1, NUM_LEDS_3B);
-Zone zoneB = Zone(&leds2, 1, NUM_LEDS_2C);
-Zone zoneC = Zone(&leds2, 1, NUM_LEDS_2B);
-Zone zoneD = Zone(&leds3, 1, NUM_LEDS_1C);
-Zone zoneE = Zone(&leds3, 1, NUM_LEDS_4A);
-Zone zoneF = Zone(&leds4, 1, NUM_LEDS_4AB);
-Zone zoneG = Zone(&leds4, 1, NUM_LEDS_1A);
-Zone zoneH = Zone(&leds4, 1, NUM_LEDS_2A);
+// Zone zoneA = Zone(&leds1, 1, NUM_LEDS_V01);
+// Zone zoneB = Zone(&leds2, 1, NUM_LEDS_V02);
+// Zone zoneC = Zone(&leds3, 1, NUM_LEDS_V03);
+// Zone zoneD = Zone(&leds4, 1, NUM_LEDS_V04);
+// Zone zoneE = Zone(&leds5, 1, NUM_LEDS_V05);
+// Zone zoneF = Zone(&leds6, 1, NUM_LEDS_V06);
+// Zone zoneG = Zone(&leds7, 1, NUM_LEDS_V07);
+// Zone zoneH = Zone(&leds8, 1, NUM_LEDS_V08);
 
 
-Zone * ZONES[NUM_ZONES] = {
-  &zoneA, &zoneB, &zoneC, &zoneD, &zoneE, &zoneF, &zoneG, &zoneH,
-  &zoneI, &zoneJ, &zoneK, &zoneL, &zoneM, &zoneN, &zoneO, &zoneP,
-  &zoneQ, &zoneR, &zoneS, &zoneT, &zoneU, &zoneV, &zoneW, &zoneX
-};
+// Zone * ZONES[NUM_STRIPS] = { &zoneA, &zoneB, &zoneC, &zoneD, &zoneE, &zoneF, &zoneG, &zoneH };
 
 const int PINS[NUM_STRIPS] = {PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7, PIN_8};
 const int NUM_LEDS[] = {
-  NUM_LEDS_3B, NUM_LEDS_2C, NUM_LEDS_2B, NUM_LEDS_1C,
-  NUM_LEDS_4A, N
-  UM_LEDS_F, NUM_LEDS_1A, NUM_LEDS_2A,
-  NUM_LEDS_3A, NUM_LEDS_3C, NUM_LEDS_K, NUM_LEDS_4C,
-  NUM_LEDS_3AB, NUM_LEDS_3A, NUM_LEDS_4CB, NUM_LEDS_P,
-  NUM_LEDS_Q, NUM_LEDS_R, NUM_LEDS_S, NUM_LEDS_T,
-  NUM_LEDS_U, NUM_LEDS_V, NUM_LEDS_W, NUM_LEDS_X
+    NUM_LEDS_V01, NUM_LEDS_V02, NUM_LEDS_V03, NUM_LEDS_V04, 
+    NUM_LEDS_V05, NUM_LEDS_V06, NUM_LEDS_V07, NUM_LEDS_V08
 };
 
-//Adafruit_NeoPixel * STRIPS[NUM_ZONES] = {&leds1, &leds2, &leds3, &leds4, &leds5, &leds6, &leds7, &leds8};
+//Adafruit_NeoPixel * STRIPS[NUM_STRIPS] = {&leds1, &leds2, &leds3, &leds4, &leds5, &leds6, &leds7, &leds8};
 
 int brightness_value = 255;
 int refreshMode = ZONE_MODE;
@@ -178,17 +168,17 @@ void loop() {
         }
 
         if (elapsedTime > holdTime) {
-          for (int i = 0; i < int(NUM_ZONES / 2); i++) {
-            ZONES[i]->setZoneColor( red, green, blue );
-            ZONES[NUM_ZONES - i]->setZoneColor( red, green, blue );
+          for (int i = 0; i < int(NUM_STRIPS / 2); i++) {
+            setStripColor(STRIPS[i], red, green, blue );
+            setStripColor(STRIPS[NUM_STRIPS - i], red, green, blue );
             delay(50);
           }
           red = random(0, 255);
           green = random(230, 255);
           blue = random(0, 100);
-          for (int i = int(NUM_ZONES / 2); i >= 0; i--) {
-            ZONES[i]->setZoneColor( red, green, blue );
-            ZONES[NUM_ZONES - i]->setZoneColor( red, green, blue );
+          for (int i = int(NUM_STRIPS / 2); i >= 0; i--) {
+            setStripColor(STRIPS[i], red, green, blue );
+            setStripColor(STRIPS[NUM_STRIPS - i], red, green, blue );
             delay(50);
           }
           elapsedTime -= holdTime;
@@ -211,11 +201,11 @@ void loop() {
         }
 
         if (elapsedTime > holdTime) {
-          k = random(0, NUM_ZONES);
+          k = random(0, NUM_STRIPS);
           red = random(0, 255);
           green = random(230, 255);
           blue = random(0, 100);
-          colorWipeZone(k, red, green, blue);
+          setStripColor(STRIPS[k], red, green, blue);
           elapsedTime -= holdTime;
           holdTime = random(1000, 10000);
           Serial.print("hoding time :"); Serial.print(holdTime / 1000, DEC); Serial.println(" seconds");
@@ -255,11 +245,11 @@ void loop() {
 }
 
 
-void colorWipeZone(int zoneNum, int r, int g, int b) {
-  Serial.print("Volume #"); Serial.println(zoneNum);
-  Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
-  ZONES[zoneNum]->setZoneColor(r, g, b);
-}
+// void colorWipeZone(int zoneNum, int r, int g, int b) {
+//   Serial.print("Volume #"); Serial.println(zoneNum);
+//   Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
+//   ZONES[zoneNum]setStripColor(r, g, b);
+// }
 
 /*
    Propagate color in all zones
@@ -268,40 +258,50 @@ boolean propagate_color(int freq, int r, int g, int b) {
   float perCent = fmod(millis(), freq) / freq;
   perCent *= 100.0f;
 
-  float zoneA_r, zoneA_g, zoneA_b,
-        zoneB_r, zoneB_g, zoneB_b,
-        zoneC_r, zoneC_g, zoneC_b,
-        zoneD_r, zoneD_g, zoneD_b,
-        zoneE_r, zoneE_g, zoneE_b,
-        zoneF_r, zoneF_g, zoneF_b;
+  float strip1_r, strip1_g, strip1_b,
+        strip2_r, strip2_g, strip2_b,
+        strip3_r, strip3_g, strip3_b,
+        strip4_r, strip4_g, strip4_b,
+        strip5_r, strip5_g, strip5_b,
+        strip6_r, strip6_g, strip6_b,
+        strip7_r, strip7_g, strip7_b,
+        strip8_r, strip8_g, strip8_b;
 
-  zoneA_r = clampMap(perCent,  0,  16,   0, r);
-  zoneB_r = clampMap(perCent,  16,  32,   0, r);
-  zoneC_r = clampMap(perCent,  32, 48,   0, r);
-  zoneD_r = clampMap(perCent,  48,  64,   0, r);
-  zoneE_r = clampMap(perCent,  64,  78,   0, r);
-  zoneF_r = clampMap(perCent,  78,  96,   0, r);
-  zoneA_g = clampMap(perCent,  0,  16,   0, g);
-  zoneB_g = clampMap(perCent,  16,  32,   0, g);
-  zoneC_g = clampMap(perCent,  32, 48,   0, g);
-  zoneD_g = clampMap(perCent,  48,  64,   0, g);
-  zoneE_g = clampMap(perCent,  64,  78,   0, g);
-  zoneF_g = clampMap(perCent,  78,  96,   0, g);
-  zoneA_b = clampMap(perCent,  0,  16,   0, b);
-  zoneB_b = clampMap(perCent,  16,  32,   0, b);
-  zoneC_b = clampMap(perCent,  32, 48,   0, b);
-  zoneD_b = clampMap(perCent,  48,  64,   0, b);
-  zoneE_b = clampMap(perCent,  64,  78,   0, b);
-  zoneF_b = clampMap(perCent,  78,  96,   0, b);
+  strip1_r = clampMap(perCent,   0,   12,   0, r);
+  strip2_r = clampMap(perCent,  13,   24,   0, r);
+  strip3_r = clampMap(perCent,  25,   37,   0, r);
+  strip4_r = clampMap(perCent,  38,   50,   0, r);
+  strip5_r = clampMap(perCent,  51,   62,   0, r);
+  strip6_r = clampMap(perCent,  63,   75,   0, r);
+  strip7_r = clampMap(perCent,  76,   87,   0, r);
+  strip8_r = clampMap(perCent,  88,  100,   0, r);
+  strip1_g = clampMap(perCent,   0,   12,   0, g);
+  strip2_g = clampMap(perCent,  13,   24,   0, g);
+  strip3_g = clampMap(perCent,  25,   37,   0, g);
+  strip4_g = clampMap(perCent,  38,   50,   0, g);
+  strip5_g = clampMap(perCent,  51,   62,   0, g);
+  strip6_g = clampMap(perCent,  63,   75,   0, g);
+  strip7_g = clampMap(perCent,  76,   87,   0, g);
+  strip8_g = clampMap(perCent,  88,  100,   0, g);
+  strip1_b = clampMap(perCent,   0,   12,   0, b);
+  strip2_b = clampMap(perCent,  13,   24,   0, b);
+  strip3_b = clampMap(perCent,  25,   37,   0, b);
+  strip4_b = clampMap(perCent,  38,   50,   0, b);
+  strip5_b = clampMap(perCent,  51,   62,   0, b);
+  strip6_b = clampMap(perCent,  63,   75,   0, b);
+  strip7_b = clampMap(perCent,  76,   87,   0, b);
+  strip8_b = clampMap(perCent,  88,  100,   0, b);
 
-  zoneA.setZoneColor(zoneA_r, zoneA_g, zoneA_b);
-  zoneB.setZoneColor(zoneB_r, zoneB_g, zoneB_b);
-  zoneC.setZoneColor(zoneC_r, zoneC_g, zoneC_b);
-  zoneD.setZoneColor(zoneD_r, zoneD_g, zoneD_b);
-  zoneE.setZoneColor(zoneE_r, zoneE_g, zoneE_b);
-  zoneF.setZoneColor(zoneF_r, zoneF_g, zoneF_b);
+  setStripColor ( STRIPS[1], strip1_r, strip1_g, strip1_b);
+  setStripColor ( STRIPS[2], strip2_r, strip2_g, strip2_b);
+  setStripColor ( STRIPS[3], strip3_r, strip3_g, strip3_b);
+  setStripColor ( STRIPS[4], strip4_r, strip4_g, strip4_b);
+  setStripColor ( STRIPS[5], strip5_r, strip5_g, strip5_b);
+  setStripColor ( STRIPS[6], strip6_r, strip6_g, strip6_b);
+  setStripColor ( STRIPS[7], strip7_r, strip7_g, strip7_b);
+  setStripColor ( STRIPS[8], strip8_r, strip8_g, strip8_b);
 
-  if (zoneF_b >= b) {
+  if (strip8_b >= b) {
     return true;
   }
   return false;
@@ -311,8 +311,8 @@ boolean propagate_color(int freq, int r, int g, int b) {
  *****************************************************************/
 void SetAllZonesToColor(int r, int g, int b) {
   // Tout à noir
-  for (int i = 0; i < NUM_ZONES; i++) {
-    ZONES[i]->setZoneColor(r, g, b);
+  for (int i = 0; i < NUM_STRIPS; i++) {
+    setStripColor(STRIPS[i], r, g, b);
   }
 }
 
@@ -321,8 +321,8 @@ void SetAllZonesToColor(int r, int g, int b) {
  *****************************************************************/
 void showAllZones() {
   // Néopixel
-  for (int i = 0; i < NUM_ZONES; i++) {
-    ZONES[i]->show();
+  for (int i = 0; i < NUM_STRIPS; i++) {
+    STRIPS[i]->show();
   }
 }
 
