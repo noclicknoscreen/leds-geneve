@@ -201,8 +201,8 @@ void loop() {
       if (firstTime) {
         Serial.println("Scénario 1 : Blanc allumage progressif");
         firstTime = false;
-        holdTime = 100;
-        intervall = 10;
+        holdTime = 10;
+        intervall = 2;
         refreshMode = STRIP_MODE;
       }
       if (elapsedTime > holdTime && intervall > 0) {
@@ -251,9 +251,9 @@ void loop() {
         Serial.println("Scénario #3 : Sinusoidal brightness on a led train");
         firstTime = false;
         refreshMode = STRIP_MODE;
-        red = random(200, 255);
-        green = random(180, 200);
-        blue = random(0, 50);
+        red = random(200, 230);
+        green = random(180, 230);
+        blue = random(0, 40);
       } else {
         sinusoidalTheaterChase(60, 20000.0f, red, green, blue);
       }
