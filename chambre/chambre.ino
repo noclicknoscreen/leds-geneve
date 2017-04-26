@@ -247,7 +247,18 @@ void loop() {
         break;
       }
     case 3 :
-      {
+      if (firstTime) {
+        Serial.println("Scénario #3 : Sinusoidal brightness on a led train");
+        firstTime = false;
+        refreshMode = STRIP_MODE;
+        red = random(200, 255);
+        green = random(180, 200);
+        blue = random(0, 50);
+      } else {
+        sinusoidalTheaterChase(60, 20000.0f, red, green, blue);
+      }
+      break;
+      /*      {
         // init for the first time
         if (firstTime) {
           Serial.println("Scénario #3, random green hues in random zones, with a randomized hild time.");
@@ -271,6 +282,7 @@ void loop() {
         }
         break;
       }
+      */
     case 4 :
       if (firstTime) {
         Serial.println("Scénario 4 : Constrained Rainbow 100 to 190");

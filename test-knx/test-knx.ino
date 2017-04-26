@@ -124,8 +124,14 @@ void setup()
 void loop() {
 
   board_blinking(500);
-  SetAllZonesToColor(255, 255, 255);
-
+  //SetAllZonesToColor(255, 255, 255);
+  
+  zone1.setZoneColor(255, 0, 0);
+  delay(500);
+  zone1.setZoneColor(0, 0, 0);
+  delay(500);
+  showAllZones();
+  
   int knxA, knxB, knxC, knxD;
   // Pin de pilotage des scénarii
   knxA = digitalRead(PIN_SC1);
@@ -133,6 +139,7 @@ void loop() {
   knxC = digitalRead(PIN_SC3);
   knxD = digitalRead(PIN_SC4);
 
+  //if (millis() % 1000 == 0) {
   Serial.print(millis());Serial.print(" ");
   Serial.print("KNX State (Default State 1, enclenché 0) :");
   Serial.print("A=");Serial.print(knxA);Serial.print(" ");
@@ -141,7 +148,7 @@ void loop() {
   Serial.print("D=");Serial.print(knxD);Serial.print(" ");
   Serial.print("Choix=");Serial.print(choix);Serial.print(" ");
   Serial.println();
-  
+  //}
   
 /*
   // choix du scénario
@@ -197,12 +204,13 @@ void loop() {
     default :
       choix = 1;
   }
-  */
+  
   if (refreshMode == ZONE_MODE) {
     showAllZones();
   } else {
     showAllStrips();
   }
+  */
 /*
   // Reading choice
   read_choice();
