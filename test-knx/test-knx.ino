@@ -93,8 +93,8 @@ void setup()
   STRIPS[6] = &pixels_C7;
   STRIPS[7] = &pixels_C8;
 
-  pinMode(TEENSY_LED, HIGH);
-
+  pinMode(TEENSY_LED, OUTPUT);
+  
   // Pin de pilotage des scénarii
   pinMode(PIN_SC1, INPUT_PULLUP); // dry contact
   pinMode(PIN_SC2, INPUT_PULLUP); // dry contact
@@ -122,16 +122,16 @@ void setup()
    BOUCLE
  *********************************************************************************/
 void loop() {
+  
+  if((millis() % 500) > 250){
+    digitalWrite(TEENSY_LED, HIGH);
+  }else{
+    digitalWrite(TEENSY_LED, LOW);
+  }
 
-  board_blinking(500);
-  //SetAllZonesToColor(255, 255, 255);
-  
-  zone1.setZoneColor(255, 0, 0);
-  delay(500);
-  zone1.setZoneColor(0, 0, 0);
-  delay(500);
-  showAllZones();
-  
+
+  SetAllZonesToColor(255, 255, 255);
+
   int knxA, knxB, knxC, knxD;
   // Pin de pilotage des scénarii
   knxA = digitalRead(PIN_SC1);
