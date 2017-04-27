@@ -164,11 +164,11 @@ void loop() {
         refreshMode = ZONE_MODE;
       } else {
         zoneA.setZoneColor(255, 255, 255);
-        zoneB.setZoneColor(175, 60, 190);
-        zoneC.setZoneColor(100, 107, 189);
-        zoneD.setZoneColor(175, 82, 90);
+        zoneB.setZoneColor(255, 255, 255); //(175, 60, 190);
+        zoneC.setZoneColor(255, 255, 255); //(100, 107, 189);
+        zoneD.setZoneColor(255, 255, 255); //(175, 82, 90);
         zoneE.setZoneColor(255, 255, 255);
-        zoneF.setZoneColor(175, 60, 190);
+        zoneF.setZoneColor(255, 255, 255); //(175, 60, 190);
       }
       break;
     case 2 :
@@ -203,24 +203,12 @@ void loop() {
       {
         // init for the first time
         if (firstTime) {
-          Serial.println("Scénario #3, random green hues in random zones, with a randomized hild time.");
+          Serial.println("Scénario #4, Rainbow.");
           holdTime = 1000;
-          refreshMode = ZONE_MODE;
-          red = random(0, 255);
-          green = random(230, 255);
-          blue = random(0, 100);
-          firstTime = propagate_color(5000, red, green, blue);
-        }
-
-        if (elapsedTime > holdTime) {
-          k = random(0, NUM_ZONES);
-          red = random(0, 255);
-          green = random(230, 255);
-          blue = random(0, 100);
-          colorWipeZone(k, red, green, blue);
-          elapsedTime -= holdTime;
-          holdTime = random(1000, 10000);
-          Serial.print("hoding time :"); Serial.print(holdTime / 1000, DEC); Serial.println(" seconds");
+          refreshMode   = STRIP_MODE;
+          firstTime = false;
+        } else {
+          constrainedRainbow(80, 150, 10000.0f);
         }
         break;
       }
@@ -233,7 +221,7 @@ void loop() {
           refreshMode   = STRIP_MODE;
           firstTime = false;
         } else {
-          constrainedRainbow(25, 120, 6000.0f);
+          constrainedRainbow(170, 240, 6000.0f);
         }
         break;
       }
