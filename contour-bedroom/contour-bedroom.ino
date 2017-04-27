@@ -10,6 +10,12 @@
 #include <avr/power.h>
 #endif
 
+// Mode TEST : Décommenter cette ligne
+#define TEST_MODE 2
+// 0 - Test des scénariis un par un (1-5)
+// 2 = Test des Strips
+//---------------------------------------
+
 // Nombre de zones
 #define NUM_ZONES 8
 #define NUM_STRIPS 8
@@ -73,6 +79,10 @@ Zone * ZONES[NUM_ZONES] = {&zone1, &zone2, &zone3, &zone4, &zone5, &zone6, &zone
 int brightness_value = 255; // Between 0 and 100 %
 
 int refreshMode = ZONE_MODE;
+
+#ifdef TEST_MODE
+int testIdx = 0;
+#endif
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -122,8 +132,20 @@ void setup()
    BOUCLE
  *********************************************************************************/
 void loop() {
-
   board_blinking(500);
+
+  // Mode TEST
+  // Tester toutes les zones à chaque appuie sur la touche 'T'
+#ifdef TEST_MODE
+  if (TEST_MODE != 0) {
+    testerZonesEtStrips();
+  }
+#endif
+
+#ifdef TEST_MODE
+  if (TEST_MODE == 0) {
+#endif
+  
   SetAllZonesToColor(255, 255, 255);
 /*
   // choix du scénario
@@ -185,6 +207,11 @@ void loop() {
   } else {
     showAllStrips();
   }
+
+#ifdef TEST_MODE
+  } // end if TEST_MODE == 0
+#endif
+
 /*
   // Reading choice
   read_choice();
