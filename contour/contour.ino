@@ -5,7 +5,6 @@
 
 *********************************************************************************/
 #include <Adafruit_NeoPixel.h>
-#include <Zones.h>
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
@@ -52,7 +51,7 @@
 # define NUM_LEDS_C7 150
 # define NUM_LEDS_C8 150 // OK
 
-const int PINS[NUM_ZONES] = {PIN_ZONE_C1, PIN_ZONE_C2, PIN_ZONE_C3, PIN_ZONE_C4, PIN_ZONE_C5, PIN_ZONE_C6, PIN_ZONE_C8};
+const int PINS[NUM_STRIPS] = {PIN_ZONE_C1, PIN_ZONE_C2, PIN_ZONE_C3, PIN_ZONE_C4, PIN_ZONE_C5, PIN_ZONE_C6, PIN_ZONE_C8};
 
 Adafruit_NeoPixel pixels_C1 = Adafruit_NeoPixel(NUM_LEDS_C1, PIN_ZONE_C1, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel pixels_C2 = Adafruit_NeoPixel(NUM_LEDS_C2, PIN_ZONE_C2, NEO_GRB + NEO_KHZ800);
@@ -63,22 +62,8 @@ Adafruit_NeoPixel pixels_C6 = Adafruit_NeoPixel(NUM_LEDS_C6, PIN_ZONE_C6, NEO_GR
 Adafruit_NeoPixel pixels_C7 = Adafruit_NeoPixel(NUM_LEDS_C7, PIN_ZONE_C7, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel pixels_C8 = Adafruit_NeoPixel(NUM_LEDS_C8, PIN_ZONE_C8, NEO_GRB + NEO_KHZ800);
 
-Zone zone1 = Zone(&pixels_C1, 1, NUM_LEDS_C1);
-Zone zone2 = Zone(&pixels_C2, 1, NUM_LEDS_C2);
-Zone zone3 = Zone(&pixels_C3, 1, NUM_LEDS_C3);
-Zone zone4 = Zone(&pixels_C4, 1, NUM_LEDS_C4);
-Zone zone5 = Zone(&pixels_C5, 1, NUM_LEDS_C5);
-Zone zone6 = Zone(&pixels_C6, 1, NUM_LEDS_C6);
-Zone zone7 = Zone(&pixels_C7, 1, NUM_LEDS_C7);
-Zone zone8 = Zone(&pixels_C8, 1, NUM_LEDS_C8);
-
-Zone * ZONES[NUM_ZONES] = {&zone1, &zone2, &zone3, &zone4, &zone5, &zone6, &zone7, &zone8};
-
-//Adafruit_NeoPixel * STRIPS[NUM_ZONES] = {&pixels_C1, &pixels_C2, &pixels_C3, &pixels_C4, &pixels_C5, &pixels_C6, &pixels_C7, &pixels_C8};
-
 int brightness_value = 255; // Between 0 and 100 %
-
-int refreshMode = ZONE_MODE;
+int intervall;
 
 /*********************************************************************************
    Setup
@@ -108,20 +93,18 @@ void setup()
   pinMode(PIN_SC3, INPUT_PULLUP); // dry contact
   pinMode(PIN_SC4, INPUT_PULLUP); // dry contact
 
-  for (int i = 0; i < NUM_ZONES; i++) {
+  for (int i = 0; i < NUM_STRIPS; i++) {
     Serial.print("Init Zone #"); Serial.println(i);
     pinMode(PINS[i], LOW);
     STRIPS[i]->begin();
     STRIPS[i]->setBrightness(brightness_value);
-    ZONES[i]->setZoneBrightness(brightness_value);
     // Faire la somme de tous les pixels
     totalNumLeds += STRIPS[i]->numPixels();
   }
 
-  SetAllZonesToColor(0, 0, 0);
-  showAllZones();
-
-  choix = 0;
+  SetAllStripsToColor(0, 0, 0);
+  showAllStrips();
+  choix = 5;
   Serial.println("___END SETUP___");
 }
 
@@ -142,97 +125,40 @@ void loop() {
 #ifdef TEST_MODE
   if (TEST_MODE == 0) {
 #endif
-  
-  SetAllZonesToColor(255, 255, 255);
-/*
-  // choix du scénario
-  switch (choix) {
-    case 1 :
-      if (firstTime) {
-        Serial.println("Scénario 1 : Blanc violacé");
-        firstTime = false;
-        holdTime = 100;
-        intervall = 10;
-        refreshMode = STRIP_MODE;
-      }
-      if (elapsedTime > holdTime && intervall > 0) {
-        setColorOneLedEvery(intervall, 255, 255, 255);
-        elapsedTime -= holdTime;
-        intervall--;
-      }
-      break;
-    case 2 :
-      if (firstTime) {
-        Serial.println("Scénario 2 : Blanc pur");
-        firstTime = false;
-        refreshMode = ZONE_MODE;
-      }
-      SetAllZonesToColor(255, 255, 255);
-      break;
-    case 3 :
-      if (firstTime) {
-        Serial.println("Scénario 3 : Blanc tirant sur le vert");
-        firstTime = false;
-        refreshMode = ZONE_MODE;
-      }
-      SetAllZonesToColor(random(100, 150), 255, 230);
-      break;
-    case 4 :
-      if (firstTime) {
-        Serial.println("Scénario 4 : Blanc pur");
-        firstTime = false;
-        refreshMode = ZONE_MODE;
-      }
-      SetAllZonesToColor(255, 255, 255);
-    case 5 :
-      if (firstTime) {
-        Serial.println("Scénario #5, All the lights to black.");
-        firstTime = false;
-        // All the light OFF
-        SetAllZonesToColor(0, 0, 0);
-        for (int i = 0; i < NUM_STRIPS; i++) {
+
+    //SetAllZonesToColor(255, 255, 255);
+
+    // choix du scénario
+    switch (choix) {
+      case 5 :
+        if (firstTime) {
+          Serial.println("Scénario #5, All the lights to black.");
+          firstTime = false;
+          // All the light OFF
           SetAllStripsToColor(0, 0, 0);
         }
-      }
-      break;
-    default :
-      choix = 1;
-  }
-  */
-  if (refreshMode == ZONE_MODE) {
-    showAllZones();
-  } else {
+        break;
+      default :
+        white();
+    }
+
     showAllStrips();
-  }
 
 #ifdef TEST_MODE
   } // end if TEST_MODE == 0
 #endif
 
-/*
   // Reading choice
   read_choice();
-  */
 }
 
-/*****************************************************************
-   Setting all zones to back.
- *****************************************************************/
-void SetAllZonesToColor(int r, int g, int b) {
-  // Tout à noir
-  for (int i = 0; i < NUM_ZONES; i++) {
-    ZONES[i]->setZoneColor(r, g, b);
+
+void white() {
+  if (firstTime) {
+    Serial.print("Scénario #"); Serial.print(choix); Serial.println(", All the lights to white.");
+    firstTime = false;
+    // All the light OFF
+    SetAllStripsToColor(255, 255, 255);
   }
 }
-
-/*****************************************************************
-  Showing all zones
- *****************************************************************/
-void showAllZones() {
-  // Néopixel
-  for (int i = 0; i < NUM_ZONES; i++) {
-    ZONES[i]->show();
-  }
-}
-
 
