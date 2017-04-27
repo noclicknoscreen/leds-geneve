@@ -11,7 +11,7 @@
 #endif
 
 // Mode TEST : Décommenter cette ligne
-#define TEST_MODE 2
+//define TEST_MODE 2
 // 0 - Test des scénariis un par un (1-5)
 // 2 = Test des Strips
 //---------------------------------------
