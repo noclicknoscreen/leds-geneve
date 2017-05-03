@@ -73,6 +73,9 @@ Zone * ZONES[NUM_ZONES] = {&zone1, &zone2, &zone3, &zone4, &zone5, &zone6, &zone
 int brightness_value = 255; // Between 0 and 100 %
 
 int refreshMode = ZONE_MODE;
+
+int newChoix = 5;
+
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -94,7 +97,7 @@ void setup()
   STRIPS[7] = &pixels_C8;
 
   pinMode(TEENSY_LED, OUTPUT);
-  
+
   // Pin de pilotage des scénarii
   pinMode(PIN_SC1, INPUT_PULLUP); // dry contact
   pinMode(PIN_SC2, INPUT_PULLUP); // dry contact
@@ -122,15 +125,12 @@ void setup()
    BOUCLE
  *********************************************************************************/
 void loop() {
-  
-  if((millis() % 500) > 250){
+
+  if ((millis() % 500) > 250) {
     digitalWrite(TEENSY_LED, HIGH);
-  }else{
+  } else {
     digitalWrite(TEENSY_LED, LOW);
   }
-
-
-  SetAllZonesToColor(255, 255, 255);
 
   int knxA, knxB, knxC, knxD;
   // Pin de pilotage des scénarii
@@ -139,81 +139,112 @@ void loop() {
   knxC = digitalRead(PIN_SC3);
   knxD = digitalRead(PIN_SC4);
 
-  //if (millis() % 1000 == 0) {
-  Serial.print(millis());Serial.print(" ");
-  Serial.print("KNX State (Default State 1, enclenché 0) :");
-  Serial.print("A=");Serial.print(knxA);Serial.print(" ");
-  Serial.print("B=");Serial.print(knxB);Serial.print(" ");
-  Serial.print("C=");Serial.print(knxC);Serial.print(" ");
-  Serial.print("D=");Serial.print(knxD);Serial.print(" ");
-  Serial.print("Choix=");Serial.print(choix);Serial.print(" ");
-  Serial.println();
+  if (knxA == 0){
+    newChoix = 1;
+  }else if (knxB == 0){
+    newChoix = 2;
+  }else if (knxC == 0){
+    newChoix = 3;
+  }else if (knxD == 0){
+    newChoix = 4;
+  }else{
+    newChoix = 5;
+  }
+
+  if (newChoix != choix) {
+    
+    //if (millis() % 1000 == 0)
+    Serial.print(millis()); Serial.print(" ");
+    Serial.print("KNX State (Default State 1, enclenché 0) :");
+    Serial.print("A="); Serial.print(knxA); Serial.print(" ");
+    Serial.print("B="); Serial.print(knxB); Serial.print(" ");
+    Serial.print("C="); Serial.print(knxC); Serial.print(" ");
+    Serial.print("D="); Serial.print(knxD); Serial.print(" ");
+    Serial.print("newChoix="); Serial.print(newChoix); Serial.print(" ");
+    Serial.println();
+
+    if (knxA && knxB && knxC && knxD) {
+      Serial.println("Blanc -----------------------");
+      // Blanc --
+      SetAllZonesToColor(255, 255, 255);
+    } else {
+      // Gris Bleu
+      Serial.println("Gris/Bleu -----------------------");
+      SetAllZonesToColor(150, 150, 255);
+    }
+
+  }
+  choix = newChoix;
   //}
-  
-/*
-  // choix du scénario
-  switch (choix) {
-    case 1 :
-      if (firstTime) {
-        Serial.println("Scénario 1 : Blanc violacé");
-        firstTime = false;
-        holdTime = 100;
-        intervall = 10;
-        refreshMode = STRIP_MODE;
-      }
-      if (elapsedTime > holdTime && intervall > 0) {
-        setColorOneLedEvery(intervall, 255, 255, 255);
-        elapsedTime -= holdTime;
-        intervall--;
-      }
-      break;
-    case 2 :
-      if (firstTime) {
-        Serial.println("Scénario 2 : Blanc pur");
-        firstTime = false;
-        refreshMode = ZONE_MODE;
-      }
-      SetAllZonesToColor(255, 255, 255);
-      break;
-    case 3 :
-      if (firstTime) {
-        Serial.println("Scénario 3 : Blanc tirant sur le vert");
-        firstTime = false;
-        refreshMode = ZONE_MODE;
-      }
-      SetAllZonesToColor(random(100, 150), 255, 230);
-      break;
-    case 4 :
-      if (firstTime) {
-        Serial.println("Scénario 4 : Blanc pur");
-        firstTime = false;
-        refreshMode = ZONE_MODE;
-      }
-      SetAllZonesToColor(255, 255, 255);
-    case 5 :
-      if (firstTime) {
-        Serial.println("Scénario #5, All the lights to black.");
-        firstTime = false;
-        // All the light OFF
-        SetAllZonesToColor(0, 0, 0);
-        for (int i = 0; i < NUM_STRIPS; i++) {
-          SetAllStripsToColor(0, 0, 0);
+
+
+  // --
+  showAllZones();
+
+  /*
+    // choix du scénario
+    switch (choix) {
+      case 1 :
+        if (firstTime) {
+          Serial.println("Scénario 1 : Blanc violacé");
+          firstTime = false;
+          holdTime = 100;
+          intervall = 10;
+          refreshMode = STRIP_MODE;
         }
-      }
-      break;
-    default :
-      choix = 1;
-  }
-  
-  if (refreshMode == ZONE_MODE) {
-    showAllZones();
-  } else {
-    showAllStrips();
-  }
+        if (elapsedTime > holdTime && intervall > 0) {
+          setColorOneLedEvery(intervall, 255, 255, 255);
+          elapsedTime -= holdTime;
+          intervall--;
+        }
+        break;
+      case 2 :
+        if (firstTime) {
+          Serial.println("Scénario 2 : Blanc pur");
+          firstTime = false;
+          refreshMode = ZONE_MODE;
+        }
+        SetAllZonesToColor(255, 255, 255);
+        break;
+      case 3 :
+        if (firstTime) {
+          Serial.println("Scénario 3 : Blanc tirant sur le vert");
+          firstTime = false;
+          refreshMode = ZONE_MODE;
+        }
+        SetAllZonesToColor(random(100, 150), 255, 230);
+        break;
+      case 4 :
+        if (firstTime) {
+          Serial.println("Scénario 4 : Blanc pur");
+          firstTime = false;
+          refreshMode = ZONE_MODE;
+        }
+        SetAllZonesToColor(255, 255, 255);
+      case 5 :
+        if (firstTime) {
+          Serial.println("Scénario #5, All the lights to black.");
+          firstTime = false;
+          // All the light OFF
+          SetAllZonesToColor(0, 0, 0);
+          for (int i = 0; i < NUM_STRIPS; i++) {
+            SetAllStripsToColor(0, 0, 0);
+          }
+        }
+        break;
+      default :
+        choix = 1;
+    }
+
+    if (refreshMode == ZONE_MODE) {
+      showAllZones();
+    } else {
+      showAllStrips();
+    }
   */
-/*
-  // Reading choice
-  read_choice();
+  /*
+    // Reading choice
+    read_choice();
   */
 }
 

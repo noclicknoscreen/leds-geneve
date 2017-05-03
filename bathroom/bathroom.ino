@@ -17,6 +17,13 @@
 #include <avr/power.h>
 #endif
 
+// Mode TEST : Décommenter cette ligne
+//#define TEST_MODE 0
+// 0 - Test des scénariis un par un (1-5)
+// 2 = Test des Strips
+//---------------------------------------
+#define TEST_SCENARIO 4
+
 // Nombre de zones
 #define NUM_STRIPS 8
 #define NUM_ZONES 8
@@ -40,15 +47,15 @@
 # define PIN_8 22
 
 // Definir les 6 zones a eclairer
-// Valeurs réelles
-#define NUM_LEDS_V01 43 // 43 + 
-#define NUM_LEDS_V02 60 // + 51
-#define NUM_LEDS_V03 60 // 32 +
-#define NUM_LEDS_V04 79 // 34 + 38 + 7 OK
-#define NUM_LEDS_V05 57 // 5 + 52   OK
-#define NUM_LEDS_V06 60 // 23 + 
-#define NUM_LEDS_V07 60 // 41 + 
-#define NUM_LEDS_V08 64 // 57 + 7   OK
+// Valeurs selon fiche de prod
+#define NUM_LEDS_V01 76 // 43 + 33
+#define NUM_LEDS_V02 70 // 19 + 51
+#define NUM_LEDS_V03 67 // 32 + 35
+#define NUM_LEDS_V04 79 // 34 + 38 + 7
+#define NUM_LEDS_V05 57 // 5 + 52
+#define NUM_LEDS_V06 66 // 23 + 43
+#define NUM_LEDS_V07 59 // 41 + 18
+#define NUM_LEDS_V08 96 // 57 + 7 + 32
 
 Adafruit_NeoPixel leds1 = Adafruit_NeoPixel( NUM_LEDS_V01, PIN_1,  NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel leds2 = Adafruit_NeoPixel( NUM_LEDS_V02, PIN_2,  NEO_GRB + NEO_KHZ800);
@@ -73,11 +80,22 @@ Adafruit_NeoPixel leds8 = Adafruit_NeoPixel( NUM_LEDS_V08, PIN_8,  NEO_GRB + NEO
 
 const int PINS[NUM_STRIPS] = {PIN_1, PIN_2, PIN_3, PIN_4, PIN_5, PIN_6, PIN_7, PIN_8};
 const int NUM_LEDS[] = {
-    NUM_LEDS_V01, NUM_LEDS_V02, NUM_LEDS_V03, NUM_LEDS_V04, 
-    NUM_LEDS_V05, NUM_LEDS_V06, NUM_LEDS_V07, NUM_LEDS_V08
+  NUM_LEDS_V01, NUM_LEDS_V02, NUM_LEDS_V03, NUM_LEDS_V04,
+  NUM_LEDS_V05, NUM_LEDS_V06, NUM_LEDS_V07, NUM_LEDS_V08
 };
 
 //Adafruit_NeoPixel * STRIPS[NUM_STRIPS] = {&leds1, &leds2, &leds3, &leds4, &leds5, &leds6, &leds7, &leds8};
+
+
+/* ---------------------------
+   Color informations
+   0 = RED
+   50 = LEMON YELLOW
+   100 = TURQUOISE GREEN
+   150 = PURPLE BLUE
+   200 = PINK PURPLE
+   255 = RED
+*/
 
 int brightness_value = 255;
 int refreshMode = ZONE_MODE;
@@ -89,7 +107,27 @@ int red = 255;
 int green = 255;
 int blue = 255;
 
+/* ---------------------------------------
+  Scénario 2
+  ------------------------------------------*/
+uint32_t newColor = 0;
+#define SC2_LOW   50
+#define SC2_HIGH  150
+#define HOLDTIME  5000.0f
+/* ---------------------------------------
+  Scénario 3
+  ------------------------------------------*/
+#define SC3_COLOR 150 // Pink
+#define SC3_WHITE 255
+/* ---------------------------------------
+  Scénario 4
+  ------------------------------------------*/
+#define SC4_LOW     130
+#define SC4_HIGH    255
+#define SC4_PERIOD  10000.0f
+
 int intervall = 0;
+
 /*********************************************************************************
    Setup
  *********************************************************************************/
@@ -125,6 +163,12 @@ void setup()
   }
 
   choix = 5;
+
+  // En test, on écrase la valeur
+#ifdef TEST_MODE
+  choix = TEST_SCENARIO;
+#endif
+
 }
 
 /*********************************************************************************
@@ -133,196 +177,118 @@ void setup()
 void loop() {
   board_blinking(500);
 
-  // choix du scénario
-  switch (choix) {
-    case 1 :
-      /*
-         Scénario statique sans trop de changement
-      */
-      if (firstTime) {
-        Serial.println("Scénario 1 : Blanc allumage progressif");
-        firstTime = false;
-        holdTime = 100;
-        intervall = 10;
-        refreshMode = STRIP_MODE;
-      }
-      if (elapsedTime > holdTime && intervall > 0) {
-        setColorOneLedEvery(intervall, 100, 160, 190);
-        elapsedTime -= holdTime;
-        intervall--;
-      }
-      break;
-    case 2 :
-      /*
-         Du bord vers le centre, puis du centre vers le bord, avec une autre couleur
-         On rattaque ensuite avec la couleur avec laquelle on a fini
-      */
-      {
+  // Mode TEST
+  // Tester toutes les zones à chaque appuie sur la touche 'T'
+#ifdef TEST_MODE
+  if (TEST_MODE != 0) {
+    testerZonesEtStrips();
+  }
+#endif
+
+#ifdef TEST_MODE
+  if (TEST_MODE == 0) {
+#endif
+
+    // LOG ----------
+    //logKnxInputs();
+
+    // choix du scénario
+    switch (choix) {
+      case 1 :
+        /*
+           Scénario statique sans trop de changement
+        */
         if (firstTime) {
-          red = random(0, 255);
-          green = random(230, 255);
-          blue = random(0, 100);
+          Serial.println("Scénario 1 : Progressive white lightening");
+          firstTime = false;
+          holdTime = 10;
+          intervall = 2;
+          refreshMode = STRIP_MODE;
+        }
+        if (elapsedTime > holdTime && intervall > 0) {
+          setColorOneLedEvery(intervall, 100, 160, 190);
+          elapsedTime -= holdTime;
+          intervall--;
+        }
+        break;
+      case 2 :
+        {
+
+          // init for the first time
+          if (firstTime) {
+            Serial.println("Scénario #2, random colors in random zones, with a randomized hold time.");
+
+            refreshMode = STRIP_MODE;
+            constrainedRainbow(SC2_LOW, SC2_HIGH, 10000.0f);
+
+            firstTime = false;
+          }
+
+          colorWipeStripBathroom(STRIPS[k], HOLDTIME, newColor);
+
+          if (elapsedTime > HOLDTIME) {
+            k = random(0, NUM_STRIPS);
+
+            newColor = Wheel(random(SC2_LOW, SC2_HIGH));
+            elapsedTime -= HOLDTIME;
+
+            Serial.print("Strip #"); Serial.println(k);
+            Serial.print("Color : ");
+            Serial.print(redFrom(newColor)); Serial.print(":"); Serial.print(greenFrom(newColor)); Serial.print(":"); Serial.println(blueFrom(newColor));
+
+          }
+
+
+          /*          Serial.print("Elapsed time = "); Serial.print(elapsedTime);
+                    Serial.print(" HOLDTIME = "); Serial.print(HOLDTIME);
+                    Serial.print(" wipeFinished = "); Serial.print(wipeFinished);
+                    Serial.println();
+          */
+
+
+          break;
+        }
+      case 3 :
+        if (firstTime) {
+          Serial.println("Scénario #3 : Sinusoidal brightness on a led train");
           firstTime = false;
           refreshMode = STRIP_MODE;
-          holdTime = 4000;
+        } else {
+          sinusoidalTheaterChaseBathroom(60, 20000.0f, SC3_COLOR, SC3_WHITE);
         }
-
-        if (elapsedTime > holdTime) {
-          for (int i = 0; i < int(NUM_STRIPS / 2); i++) {
-            setStripColor(STRIPS[i], red, green, blue );
-            setStripColor(STRIPS[NUM_STRIPS - i], red, green, blue );
-            delay(50);
-          }
-          red = random(0, 255);
-          green = random(230, 255);
-          blue = random(0, 100);
-          for (int i = int(NUM_STRIPS / 2); i >= 0; i--) {
-            setStripColor(STRIPS[i], red, green, blue );
-            setStripColor(STRIPS[NUM_STRIPS - i], red, green, blue );
-            delay(50);
-          }
-          elapsedTime -= holdTime;
-          holdTime = random(10000, 20000);
-        }
-
         break;
-      }
-    case 3 :
-      {
-        // init for the first time
+      case 4 :
         if (firstTime) {
-          Serial.println("Scénario #3, random green hues in random zones, with a randomized hild time.");
-          holdTime = 1000;
-          refreshMode = ZONE_MODE;
-          red = random(0, 255);
-          green = random(230, 255);
-          blue = random(0, 100);
-          firstTime = propagate_color(5000, red, green, blue);
-        }
-
-        if (elapsedTime > holdTime) {
-          k = random(0, NUM_STRIPS);
-          red = random(0, 255);
-          green = random(230, 255);
-          blue = random(0, 100);
-          setStripColor(STRIPS[k], red, green, blue);
-          elapsedTime -= holdTime;
-          holdTime = random(1000, 10000);
-          Serial.print("hoding time :"); Serial.print(holdTime / 1000, DEC); Serial.println(" seconds");
+          Serial.println("Scénario 4 : Constrained Rainbow LOW to HIGH");
+          firstTime = false;
+          refreshMode = STRIP_MODE;
+        } else {
+          constrainedRainbow(SC4_LOW, SC4_HIGH, SC4_PERIOD);
         }
         break;
-      }
-    case 4 :
-      if (firstTime) {
-        Serial.println("Scénario 4 : Constrained Rainbow 100 to 190");
-        firstTime = false;
-        refreshMode = STRIP_MODE;
-      } else {
-        constrainedRainbow(100, 190, 10000.0f);
-      }
-    case 5 :
-      if (firstTime) {
-        Serial.println("Scénario #5, All the lights to black.");
-        firstTime = false;
-        // All the light OFF
-        refreshMode = STRIP_MODE;
-        for (int i = 0; i < NUM_STRIPS; i++) {
-          SetAllStripsToColor(0, 0, 0);
+      case 5 :
+        if (firstTime) {
+          Serial.println("Scénario #5, All the lights to black.");
+          firstTime = false;
+          // All the light OFF
+          refreshMode = STRIP_MODE;
         }
-      }
-      break;
-    default :
-      choix = 1;
-  }
-  if (refreshMode == ZONE_MODE) {
-    showAllZones();
-  } else {
-    showAllStrips();
-  }
 
+        SetAllStripsToColor(0, 0, 0);
+        break;
+      default :
+        choix = 1;
+    }
+    showAllStrips();
+
+#ifdef TEST_MODE
+  } // end if TEST_MODE == 0
+#endif
+
+#ifndef TEST_MODE
   // Reading choice
   read_choice();
-}
+#endif
 
-
-// void colorWipeZone(int zoneNum, int r, int g, int b) {
-//   Serial.print("Volume #"); Serial.println(zoneNum);
-//   Serial.print(r); Serial.print(":"); Serial.print(g); Serial.print(":"); Serial.println(b);
-//   ZONES[zoneNum]setStripColor(r, g, b);
-// }
-
-/*
-   Propagate color in all zones
-*/
-boolean propagate_color(int freq, int r, int g, int b) {
-  float perCent = fmod(millis(), freq) / freq;
-  perCent *= 100.0f;
-
-  float strip1_r, strip1_g, strip1_b,
-        strip2_r, strip2_g, strip2_b,
-        strip3_r, strip3_g, strip3_b,
-        strip4_r, strip4_g, strip4_b,
-        strip5_r, strip5_g, strip5_b,
-        strip6_r, strip6_g, strip6_b,
-        strip7_r, strip7_g, strip7_b,
-        strip8_r, strip8_g, strip8_b;
-
-  strip1_r = clampMap(perCent,   0,   12,   0, r);
-  strip2_r = clampMap(perCent,  13,   24,   0, r);
-  strip3_r = clampMap(perCent,  25,   37,   0, r);
-  strip4_r = clampMap(perCent,  38,   50,   0, r);
-  strip5_r = clampMap(perCent,  51,   62,   0, r);
-  strip6_r = clampMap(perCent,  63,   75,   0, r);
-  strip7_r = clampMap(perCent,  76,   87,   0, r);
-  strip8_r = clampMap(perCent,  88,  100,   0, r);
-  strip1_g = clampMap(perCent,   0,   12,   0, g);
-  strip2_g = clampMap(perCent,  13,   24,   0, g);
-  strip3_g = clampMap(perCent,  25,   37,   0, g);
-  strip4_g = clampMap(perCent,  38,   50,   0, g);
-  strip5_g = clampMap(perCent,  51,   62,   0, g);
-  strip6_g = clampMap(perCent,  63,   75,   0, g);
-  strip7_g = clampMap(perCent,  76,   87,   0, g);
-  strip8_g = clampMap(perCent,  88,  100,   0, g);
-  strip1_b = clampMap(perCent,   0,   12,   0, b);
-  strip2_b = clampMap(perCent,  13,   24,   0, b);
-  strip3_b = clampMap(perCent,  25,   37,   0, b);
-  strip4_b = clampMap(perCent,  38,   50,   0, b);
-  strip5_b = clampMap(perCent,  51,   62,   0, b);
-  strip6_b = clampMap(perCent,  63,   75,   0, b);
-  strip7_b = clampMap(perCent,  76,   87,   0, b);
-  strip8_b = clampMap(perCent,  88,  100,   0, b);
-
-  setStripColor ( STRIPS[1], strip1_r, strip1_g, strip1_b);
-  setStripColor ( STRIPS[2], strip2_r, strip2_g, strip2_b);
-  setStripColor ( STRIPS[3], strip3_r, strip3_g, strip3_b);
-  setStripColor ( STRIPS[4], strip4_r, strip4_g, strip4_b);
-  setStripColor ( STRIPS[5], strip5_r, strip5_g, strip5_b);
-  setStripColor ( STRIPS[6], strip6_r, strip6_g, strip6_b);
-  setStripColor ( STRIPS[7], strip7_r, strip7_g, strip7_b);
-  setStripColor ( STRIPS[8], strip8_r, strip8_g, strip8_b);
-
-  if (strip8_b >= b) {
-    return true;
-  }
-  return false;
-}
-/*****************************************************************
-   Setting all zones to back.
- *****************************************************************/
-void SetAllZonesToColor(int r, int g, int b) {
-  // Tout à noir
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    setStripColor(STRIPS[i], r, g, b);
-  }
-}
-
-/*****************************************************************
-  Showing all zones
- *****************************************************************/
-void showAllZones() {
-  // Néopixel
-  for (int i = 0; i < NUM_STRIPS; i++) {
-    STRIPS[i]->show();
-  }
 }
 
