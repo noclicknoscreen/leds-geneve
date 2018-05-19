@@ -74,6 +74,7 @@ void setup()
   if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
 #endif
   Serial.begin(9600);
+  Serial.println("___CONTOUR SKETCH___");
   Serial.println("___ENTERING SETUP___");
 
   STRIPS[0] = &pixels_C1;

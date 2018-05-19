@@ -112,6 +112,8 @@ int intervall = 0;
 void setup()
 {
   Serial.begin(9600);
+  Serial.println("___BEDROOM SKETCH___");
+  Serial.println("___ENTERING SETUP___");
 
   STRIPS[0] = &leds1;
   STRIPS[1] = &leds2;
@@ -121,6 +123,8 @@ void setup()
   STRIPS[5] = &leds6;
   STRIPS[6] = &leds7;
   STRIPS[7] = &leds8;
+
+  pinMode(TEENSY_LED, HIGH);
 
   // Pin de pilotage des scénarii
   pinMode(PIN_SC1, INPUT_PULLUP); // dry contact
@@ -141,6 +145,7 @@ void setup()
   }
 
   choix = 5;
+  Serial.println("___END SETUP___");
 }
 
 /*********************************************************************************
